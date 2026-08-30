@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Get AI-powered Guidance for building your career. Find or Post Jobs. Get Verified details of students to get recruited">
+    <title>AcadBridge</title>
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./career.css">
+    <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
+
+    <link rel="icon" href="./favicon/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32.png">
+    <link rel="icon" type="image/svg+xml" href="./favicon/favicon.svg">
+    <link rel="apple-touch-icon" href="./favicon/favicon-180.png">
+</head>
+
+<body>
+    <header>
+        <span id="website_logo">
+            <img src="./favicon/favicon.svg" alt="favicon icon" id="logo" style="height: 2em;">
+            <span id="Acad">Acad</span><span id="Bridge">Bridge</span>
+        </span>
+        <nav>
+            <button onclick="changeTab(homeTab)">Home</button>
+            <button onclick="changeTab(profileTab)">Profile</button>
+            <button onclick="changeTab(careerGraphTab)">Career Graph</button>
+            <button onclick="changeTab(interNJobTab)">Intern & Jobs</button>
+        </nav>
+        <span id="sign-in-utility">
+            <button id="theme">
+                <img src="./svg/sun.svg" alt="theme-change" style="height: 1.2em;">
+            </button>
+            <button id="login">Get Started <i class="fa-solid fa-angle-right"></i></button>
+        </span>
+    </header>
+
+    <!-- Home Tab-->
+    <main class="tab" id="home">
+        <section id="home_hero">
+            <h1 class="hero-title">
+                Where Talent Meets<br>
+                <span class="text-gradient">Opportunity</span>
+            </h1>
+
+            <p class="hero-description">
+                AcadBridge connects students, recruiters, and academicians on one unified platform — closing the skills
+                gap through verified profiles, AI-powered matching, and real industry collaboration.
+            </p>
+
+            <div class="button-group">
+                <a href="#" class="btn btn-primary">
+                    Start as Student
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    Hire Talent
+                </a>
+            </div>
+        </section>
+
+        <section class="stats-banner">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <h2 class="stat-number">12,000+</h2>
+                    <p class="stat-label">Students Placed</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-number">2,400+</h2>
+                    <p class="stat-label">Partner Companies</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-number">94%</h2>
+                    <p class="stat-label">Match Satisfaction</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-number">200+</h2>
+                    <p class="stat-label">Institutions</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="roles-section">
+            <div class="roles-header">
+                <h2>Choose Your Role</h2>
+                <p>A tailored experience for everyone in the academia-industry ecosystem</p>
+            </div>
+
+            <div class="roles-grid">
+                <!-- Student Card -->
+                <div class="role-card card-student">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h3>Student</h3>
+                    <h4 class="role-subtitle">Find your dream internship</h4>
+                    <br>
+                    <p class="role-subtitle">Build your verified digital portfolio, take skill assessments, and get
+                        matched with top companies based on your actual skills.</p>
+
+                    <div class="tags">
+                        <span class="tag">500+ Companies</span>
+                        <span class="tag">10K+ Students</span>
+                        <span class="tag">92% Placement</span>
+                    </div>
+
+                    <a href="#" class="btn btn-student">
+                        Get Started
+                        <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                </div>
+
+                <!-- Recruiter Card -->
+                <div class="role-card card-recruiter">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-building-user"></i>
+                    </div>
+                    <h3>Recruiter</h3>
+
+                    <h4 class="role-subtitle">Hire pre-verified talent</h4>
+                    <br>
+                    <p class="role-subtitle">Post internships and jobs, then let our AI match you with verified
+                        candidates whose skills align exactly with your requirements.</p>
+
+                    <div class="tags">
+                        <span class="tag">84% Match Accuracy</span>
+                        <span class="tag">60% Faster Hiring</span>
+                        <span class="tag">2K+ Companies</span>
+                    </div>
+
+                    <a href="#" class="btn btn-recruiter">
+                        Get Started
+                        <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                </div>
+
+                <!-- Academician Card -->
+                <div class="role-card card-academician">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3>Academician (coming soon)</h3>
+                    <h4 class="role-subtitle">Bridge theory and industry</h4>
+                    <br>
+                    <p class="role-subtitle">Connect college/university professors, research projects, and faculty for monitoring internships and skills.</p>
+
+                    <div class="tags">
+                        <span class="tag">200+ Institutions</span>
+                        <span class="tag">500+ Industry Partners</span>
+                        <span class="tag">1K+ Collaborations</span>
+                    </div>
+
+                    <a class="btn btn-academician"> <!-- NO HREF ATTRIBUTE -->
+                        Get Started <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-header">
+                <h2>Everything in One Platform</h2>
+                <p>Powerful tools built for the modern academia-industry ecosystem</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Card 1 -->
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3>AI-Powered Matching</h3>
+                    <p>Smart compatibility scores based on verified skills, not just keywords.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <h3>Verified Profiles</h3>
+                    <p>Institution verification and skill assessments ensure authentic credentials.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                    <h3>Gamified Learning</h3>
+                    <p>Skill trees and digital badges keep students motivated on their learning journey.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-user-group"></i>
+                    </div>
+                    <h3>Mentorship Network</h3>
+                    <p>Direct mentorship chat with industry professionals and academicians.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Profile TAB-->
+    <main class="tab" id="profile">
+        
+    </main>
+
+    <!-- CareerGraph Tab-->
+    <main class="tab" id="careerGraph">
+        
+    </main>
+
+    <!-- Internships and Jobs Portal-->
+    <main class="tab" id="internNJob">
+        
+    </main>
+
+    <footer>
+        <span id="website_logo">
+            <img src="./favicon/favicon.svg" alt="favicon icon" id="logo" style="height: 2em;">
+            <span id="Acad">Acad</span><span id="Bridge">Bridge</span>
+        </span>
+
+        <p>© 2026 AcadBridge. All rights reserved. Made by BlackCoffee</p>
+    </footer>
+    <script src="index.js"></script>
+</body>
+
+</html>
