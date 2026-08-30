@@ -34,7 +34,7 @@ Confirms the connection was successful — you should see the repo URL listed.
 ```bash
 git pull origin main
 ```
-Pulls the latest code already on GitHub.
+Pulls the latest code already on GitHub. Always pull before you push anything to avoid merge conflicts
 
 > ⚠️ **Never work directly on `main`.** Always create your own branch first.
 
