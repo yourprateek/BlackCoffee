@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#141B2E"/>
+      <stop offset="100%" stop-color="#0A0F1E"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="8" y1="18" x2="56" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#2A3550" stroke-width="1"/>
+
+  <!-- graduation cap: top diamond -->
+  <path d="M32 16 L56 26.5 L32 37 L8 26.5 Z" fill="url(#cap)"/>
+
+  <!-- cap base band -->
+  <path d="M18 30.3 L18 40 C18 43.5 24.3 46.5 32 46.5 C39.7 46.5 46 43.5 46 40 L46 30.3 L32 36.4 Z" fill="url(#cap)" fill-opacity="0.92"/>
+
+  <!-- tassel string -->
+  <line x1="53" y1="27.8" x2="53" y2="40" stroke="#93C5FD" stroke-width="2.4" stroke-linecap="round"/>
+
+  <!-- score / match dot -->
+  <circle cx="53" cy="44.5" r="4.2" fill="#22D3EE"/>
+</svg>
