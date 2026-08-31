@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, AnyHttpUrl
+from pydantic import BaseModel, Field, AnyHttpUrl, EmailStr
 from enum import Enum
 from typing import List, Dict, Any, Literal, Optional
 
@@ -78,3 +78,4 @@ class VacanciesSchema(BaseModel):
     vacancies: List[VacancyItem] = Field(
         description= "A list of all the internship/jobs vacancies available"
     )
+

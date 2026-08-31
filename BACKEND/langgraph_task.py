@@ -60,7 +60,7 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         tavily_response = await client.search(
             query= tavily_query,
             search_depth= "advanced",
-            max_results= len(state['skills']),
+            max_results= 5,
             include_domains= career_websites
         )
 
@@ -118,7 +118,7 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         tavily_response = await client.search(
             query=tavily_query,
             search_depth="advanced",
-            max_results=len(state['skills']),
+            max_results=5,
             include_domains=career_websites
         )
         search_result = tavily_response.get('results', [])
