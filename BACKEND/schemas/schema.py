@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AnyHttpUrl
 from enum import Enum
 from typing import List, Dict, Any, Literal, Optional
 
@@ -41,4 +41,40 @@ class AnalysisSchema(BaseModel):
     )
     test_summary: str = Field(
         description= "A well formatted summary for the user based on his/her performance in the assessment"
+    )
+
+class ResumeOutputSchema(BaseModel):
+    skills: List[str] = Field(
+        description= "Skills or strong areas exracted from the resume"
+    )
+    internships: Optional[List[str]] = Field(
+        description= "Internships done by the user (if any)"
+    )
+
+class VacancyItem(BaseModel):
+    role_title: str = Field(
+        description= "The title of the internship/jobs"
+    )
+    company_name: str = Field(
+        description= "The name of the company"
+    )
+    work_location_type: Literal['Remote', 'Hybrid', 'On-site'] = Field(
+        description= "The location type of the internship/jobs"
+    )
+    location: Optional[str] = Field(
+            description= "The location of the internship/jobs"
+        )
+    url: AnyHttpUrl = Field(
+        decimal_places= "The source url of the internship/jobs vacancy"
+    )
+    income_type: Literal['stipend', 'unpaid', 'salary'] = Field(
+        decimal_places= "Whether the internship/jobs is paid or not"
+    )
+    deadline: Optional[str] = Field(
+        description= "A short bullet point if visible in the text as a deadline"
+    )
+
+class VacanciesSchema(BaseModel):
+    vacancies: List[VacancyItem] = Field(
+        description= "A list of all the internship/jobs vacancies available"
     )
