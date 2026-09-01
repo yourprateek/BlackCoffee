@@ -540,3 +540,162 @@ footer{
     }
 }
 /*-----FOOTER END-------*/
+
+/*-----LOGIN START------*/
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    padding-top: 80px;
+    background-color: var(--bg-color);
+    background:
+        radial-gradient(circle at 15% 30%, rgba(20, 40, 100, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(60, 20, 100, 0.3) 0%, transparent 45%);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.login-card {
+    background-color: #1D293D;
+    border: 1px solid #2a344d;
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    transition: all 0.3s ease;
+}
+
+/* Dynamic State Borders matching the Roles Section */
+.login-card.student-active {
+    border-color: rgba(37, 99, 235, 0.8);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+}
+
+.login-card.recruiter-active {
+    border-color: rgba(147, 51, 234, 0.8);
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.1);
+}
+
+.role-toggle {
+    display: flex;
+    background-color: #0F172B;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 2rem;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Toggle Active States */
+.toggle-btn.active#btn-student {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+}
+
+.toggle-btn.active#btn-recruiter {
+    background-color: rgba(147, 51, 234, 0.2);
+    color: #a875ff;
+}
+
+.form-wrapper form {
+    display: none;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.form-wrapper form.active-form {
+    display: flex;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-wrapper h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group i {
+    position: absolute;
+    left: 16px;
+    color: var(--text-muted);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background-color: #0F172B;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: var(--accent-color);
+}
+
+/* Button Gradients based on index.css */
+.btn-student-login {
+    background: linear-gradient(to right, #2B7FFF, #1448E7);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.2s;
+}
+
+.btn-recruiter-login {
+    background: linear-gradient(to right, #8E51FF, #700BE7);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.2s;
+}
+
+/*-----LOGIN END--------*/
