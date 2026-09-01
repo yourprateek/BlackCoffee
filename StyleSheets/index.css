@@ -1,13 +1,7 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-
-    color: var(--text-color);
-}
 :root {
     --bg-color: #020618;
     --accent-color: #2563eb;
+    --dimmed-accent-color: #1E3A8A;
     --text-color: white;
     --text-muted: #99acbe;
     font-family:
@@ -23,6 +17,13 @@
         "Open Sans",
         "Helvetica Neue",
         sans-serif;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    color: var(--text-color);
 }
 #logo {
     margin: 8px;
@@ -48,6 +49,7 @@ header {
     align-items: center;
     padding: 0.5rem 2rem;
     position: fixed;
+    top: 0;
     width: 100%;
 
     backdrop-filter: blur(10px) brightness(0.6);
@@ -134,7 +136,13 @@ nav {
 .tab{
     display: none;
 }
-
+.tab.currentTab{
+    display: block;
+}
+nav button.activeBtn {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
 #home_hero {
     display: flex;
     flex-direction: column;
@@ -234,7 +242,7 @@ nav {
 
 /*--- STATS ---*/
 .stats-banner {
-    background-color: #1E3A8A;
+    background-color: var(--dimmed-accent-color);
     padding: 2rem 8rem;
 }
 
@@ -516,9 +524,7 @@ nav {
 
 /*--- FEATURE CARDS EMND ----*/
 /*-----MAIN END-------*/
-.tab.currentTab{
-    display: block;
-}
+
 /*-----FOOTER START-------*/
 footer{
     padding: 1rem 3rem;
