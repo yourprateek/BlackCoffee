@@ -1,19 +1,26 @@
+import io
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import Runnable
-from fastapi import FastAPI, HTTPException
-from schema import AssessmentSchema, AnalysisSchema
+from resume_rag import pdf_embedding_creator
+from backend.database.user_db import get_user_db
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
 from contextlib import asynccontextmanager
-from typing import Dict, List, Any
+from langgraph_task import compiled_graph
+from typing import Dict, List, Any, Literal
 from dotenv import load_dotenv
 load_dotenv()
 
 credentials = {}
 @asynccontextmanager
 async def site_credentials(app: FastAPI):
+
+    user = get_user_db()
 
     mistral_medium_model = ChatMistralAI(
         model_name= "mistral-medium-latest",
@@ -28,15 +35,74 @@ async def site_credentials(app: FastAPI):
         model_name= "mistral-small-latest"
     )
 
+    groq_model = ChatGroq(
+        model= "openai/gpt-oss-120b",
+        temperature= 0.4
+    )
+
     credentials['mistral_m_model'] = mistral_medium_model
     credentials['gemini_model'] = gemini_model
     credentials['mistral_s_model'] = mistral_small_model
+    credentials['groq_model'] = groq_model
 
     yield credentials
 
 app = FastAPI(title= "BlackCoffee", lifespan= site_credentials)
 
-@app.post('/first_assessment')
+@app.post('/resume_upload')
+async def skill_extractor(file: UploadFile = File(...)):
+
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid file type. Only PDF files are allowed."
+        )
+
+    model: ChatGoogleGenerativeAI = credentials['gemini_model']
+    parser = PydanticOutputParser(pydantic_object= ResumeOutputSchema)
+
+    try:
+        pdf_bytes = await file.read()
+        pdf_stream = io.BytesIO(pdf_bytes)
+
+        context = await pdf_embedding_creator(pdf_stream)
+        if context:
+                prompt = ChatPromptTemplate(
+                    [
+                        ('system',"""
+
+            You are an expert HR Data Extraction Engine. 
+            Your job is to analyze the retrieved resume text provided below and extract the candidate's strongest, 
+            most prominent skills and fields of expertise, and if any internships done.
+
+            ### Instructions:
+            1. Identify technical skills, frameworks, tools, methodologies, and core domain areas where the candidate demonstrates strong proficiency or repeated experience.
+            2. Identify whther the candidate has done any internships or not, if yes state them clearly.
+            3. Rely ONLY on the provided retrieved text. Do not invent or assume any skills not explicitly mentioned or heavily implied by their listed experience.
+            4. Clean the skills (e.g., use standard capitalization like "Python", "React", "AWS").
+
+            {format_instructions}
+            """),
+                    ("human", """The retrieved context is :- 
+                    {context}""")
+                ]
+            ).partial(format_instructions= parser.get_format_instructions())
+                
+                chain = prompt | model | parser
+                response = await chain.ainvoke(
+                    {
+                        "context": context
+                    }
+                )
+                return response
+        else:
+            return {
+                "skills": "No skill found"
+            }    
+    except Exception as error:
+        raise HTTPException(status_code= 500, detail= str(error))
+
+@app.post('/initial_assessment')
 async def assessment(fields: List[str]):
 
     try:
@@ -142,3 +208,39 @@ Maintain a professional, encouraging, and highly analytical tone throughout the 
     )
 
     return response
+
+@app.get('/oppurtunities')
+async def job_intern_recommender(email: str, vacancy_type: Literal['Internship', 'Job']) -> Dict:
+
+    user: Dict[str, Any] = get_user_db(email)
+    if user:
+        try:
+            config = {"configurable": {"thread_id": user['email']}}
+            initial_state = {
+                "skills": user['skills'],
+                "location": user['location'],
+                "vacancy_type": vacancy_type
+            }
+
+            output = await compiled_graph.ainvoke(initial_state, config= config)
+            roles_availability = output['messages'][-1].content
+            roles = output['current_roles']
+
+            return {
+                "roles_availability": roles_availability,
+                "current_roles": roles
+            }
+        except Exception as err:
+            return {
+                HTTPException(status_code= 500, detail= str(err))
+            }
+    return {
+        HTTPException(status_code= 404, detail= "User cannot be found. PLease sign-up first")
+    }
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["*"],
+    allow_methods = ["*"],
+    allow_headers = ["*"]
+)

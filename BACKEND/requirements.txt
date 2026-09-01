@@ -3,10 +3,17 @@ langgraph
 langchain-core
 pydantic
 langchain-mistralai
+langchain-google-genai
 langchain-groq
+langchain-text-splitters
+langchain-chroma
+langchain-classic
 python-dotenv
 streamlit
 uvicorn
 fastapi
 requests
 rich
+pypdf
+pymongo
+pymongo[srv]
