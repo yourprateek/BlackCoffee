@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, AnyHttpUrl, EmailStr
 from enum import Enum
-from typing import List, Dict, Any, Literal, Optional
+from typing import List, Dict, Any, Literal, Optional, Tuple
 
 class QuestionItem(BaseModel):
     field: str = Field(
@@ -79,3 +79,15 @@ class VacanciesSchema(BaseModel):
         description= "A list of all the internship/jobs vacancies available"
     )
 
+class MessageType(BaseModel):
+    role: Literal['ai', 'human', 'system']
+    content: str
+
+class ThreadDetail(BaseModel):
+    thread_title: str
+    messages: List[MessageType]
+
+class UserChatThreads(BaseModel):
+    email: EmailStr
+    threads: List[ThreadDetail]
+    

@@ -9,7 +9,7 @@ from resume_rag import pdf_embedding_creator
 from backend.database.user_db import get_user_db
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
-from langgraph_task import compiled_graph
+from langgraph.langgraph_task import compiled_graph
 from typing import Dict, List, Any, Literal
 from dotenv import load_dotenv
 load_dotenv()
@@ -55,7 +55,7 @@ async def resume_analyzer(user_file: UploadFile, func_model: ChatGoogleGenerativ
             "skills": "No skill found"
         }
 
-async def assessment_generator(user_fields: List[str], func_model: ChatMistralAI):
+async def first_assessment_generator(user_fields: List[str], func_model: ChatMistralAI):
     
     parser = PydanticOutputParser(pydantic_object= AssessmentSchema)
     prompt_temp = ChatPromptTemplate.from_messages(
@@ -91,3 +91,6 @@ Here is the list of fields :- {fields}
     })
 
     return response
+
+# async def first_assessment_score()
+

@@ -1,19 +1,11 @@
 from configurations import profiles_collections
-from pymongo.cursor import Cursor
-from schema.user_schema import User
+from schemas.user_schema import User
 from pydantic import EmailStr
-from typing import List
 
-def get_all_data() -> List[User]:
+def get_user_data(email: EmailStr) -> User:
 
-    cursor: Cursor = profiles_collections.find({})
-    users = list(cursor)
+    final_user: User = profiles_collections.find_one({'email': email.lower().strip()})
 
-    return users
-
-def get user_data(email: EmailStr) -> User:
-
-    all_users = get_all_data()
-    final_user = user for user in users if user['email'] == email
-
-    return final_user
+    if final_user:
+        return final_user
+    raise ValueError(f"No user exist with email as : {email}")

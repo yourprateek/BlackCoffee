@@ -11,3 +11,5 @@ users_db: Database = client.users_db
 
 profiles_collections: Collection = users_db.user_profiles
 
+user_chat_collections: Collection = users_db.chats_db
+

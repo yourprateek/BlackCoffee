@@ -27,7 +27,7 @@ class Education(BaseModel):
 
     institution: str
     degree: str
-    branch: Optional[str] = ' 
+    branch: Optional[str]
     graduation_year: int 
 
 class Assessment(BaseModel):
@@ -52,6 +52,7 @@ class Certificate(BaseModel):
 class Experience(BaseModel):
 
     internships_done: Optional[List[str]] = []
+    courses_completed: Optional[List[str]] = []
     certifications: Optional[List[Certificate]] = Field(default_factory= List)
 
 class UserMetadata(BaseModel):
@@ -79,7 +80,7 @@ class User(BaseModel):
     skills: List[str] = Field(
         description= "Skills acquired/ practiced by the user"
     )
-    Experience: Experience = Field(
+    experience: Experience = Field(
         description= "The experience of the user"
     )
     assessment: AssessmentsCompleted = Field(
