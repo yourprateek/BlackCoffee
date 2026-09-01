@@ -27,7 +27,8 @@ class Education(BaseModel):
 
     institution: str
     degree: str
-    graduation_yaer: int 
+    branch: Optional[str] = ' 
+    graduation_year: int 
 
 class Assessment(BaseModel):
 
@@ -67,7 +68,7 @@ class User(BaseModel):
     email: EmailStr = Field(
         description= "The email of the user"
     )
-    phone_num: Optional[str] = None
+    phone_num: str
 
     location: Location = Field(
         description= "The location details of the user"
