@@ -3,10 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - AcadBridge</title>
+    <!-- Assuming base styles are in index.css -->
     <link rel="stylesheet" href="./StyleSheets/index.css">
+    <link rel="stylesheet" href="./StyleSheets/login.css">
+    <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    
+    <header>
+        <span id="website_logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <img src="./favicon/favicon.svg" alt="favicon icon" id="logo" style="height: 2em;">
+            <span id="Acad">Acad</span><span id="Bridge">Bridge</span>
+        </span>
+    </header>
+
+    <main class="login-container">
+        <div class="login-card student-active" id="loginCard">
+            
+            <div class="role-toggle">
+                <button class="toggle-btn active" id="btn-student" onclick="setRole('student')">
+                    <i class="fa-solid fa-graduation-cap"></i> Student
+                </button>
+                <button class="toggle-btn" id="btn-recruiter" onclick="setRole('recruiter')">
+                    <i class="fa-solid fa-building-user"></i> Recruiter
+                </button>
+            </div>
+
+            <div class="form-wrapper">
+                <!-- Student Login Form -->
+                <form id="student-form" class="active-form">
+                    <h2>Welcome back, Student</h2>
+                    <p class="subtitle">Log in to find your dream internship</p>
+                    
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" placeholder="University Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-student-login">Sign In</button>
+                </form>
+
+                <!-- Recruiter Login Form -->
+                <form id="recruiter-form">
+                    <h2>Welcome back, Recruiter</h2>
+                    <p class="subtitle">Log in to hire pre-verified talent</p>
+                    
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" placeholder="Work Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-recruiter-login">Sign In</button>
+                </form>
+            </div>
+            
+        </div>
+    </main>
+
+    <script src="./JavaScript/login.js"></script>
 </body>
 </html>
