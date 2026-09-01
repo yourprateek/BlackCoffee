@@ -9,6 +9,7 @@
     <title>AcadBridge</title>
     <link rel="stylesheet" href="./index.css">
     <link rel="stylesheet" href="./career.css">
+    <link rel="stylesheet" href="./profile.css">
     <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
 
     <link rel="icon" href="./favicon/favicon.ico" sizes="any">
@@ -147,7 +148,8 @@
                     <h3>Academician (coming soon)</h3>
                     <h4 class="role-subtitle">Bridge theory and industry</h4>
                     <br>
-                    <p class="role-subtitle">Connect college/university professors, research projects, and faculty for monitoring internships and skills.</p>
+                    <p class="role-subtitle">Connect college/university professors, research projects, and faculty for
+                        monitoring internships and skills.</p>
 
                     <div class="tags">
                         <span class="tag">200+ Institutions</span>
@@ -210,17 +212,33 @@
 
     <!-- Profile TAB-->
     <main class="tab" id="profile">
-        
+        <div class="hero_card">
+            <div id="basic_details">
+                <p>Hey</p>
+                <h1 id="Full_Name"></h1>
+                <div class="tags personal_details">
+                    <span class="tag company_name">MAIT</span>
+                </div>
+            </div>
+
+            <div id="profile_score"></div>
+        </div>
     </main>
 
     <!-- CareerGraph Tab-->
     <main class="tab" id="careerGraph">
-        
+        <aside id="graph-sidebar"></aside>
+        <div id="graph-viewport">
+            <div id="graph-canvas">
+                <svg id="graph-connectors"></svg>
+                <div id="graph-nodes"></div>
+            </div>
+        </div>
     </main>
 
     <!-- Internships and Jobs Portal-->
     <main class="tab" id="internNJob">
-        
+
     </main>
 
     <footer>
@@ -232,6 +250,7 @@
         <p>© 2026 AcadBridge. All rights reserved. Made by BlackCoffee</p>
     </footer>
     <script src="index.js"></script>
+    <script src="career.js"></script>
 </body>
 
 </html>
