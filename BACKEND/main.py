@@ -1,18 +1,20 @@
-import io
+from langchain_task import resume_analyzer, first_assessment_generator
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import Runnable
-from resume_rag import pdf_embedding_creator
+from resume_rag import pdf_embedding_creator, resume_storage
 from backend.database.user_db import get_user_db
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import EmailStr
 from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
+from database.user_db import get_user_data
 from contextlib import asynccontextmanager
-from langgraph_task import compiled_graph
-from typing import Dict, List, Any, Literal
+from langgraph.langgraph_task import compiled_graph
+from typing import Dict, List, Any, Literal, Annotated
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -49,8 +51,16 @@ async def site_credentials(app: FastAPI):
 
 app = FastAPI(title= "BlackCoffee", lifespan= site_credentials)
 
+@app.get('/get_user_info')
+async def get_user(user_email: EmailStr):
+    user_data = get_user_data(email= user_email)
+
+    return user_data.model_dump()
+
+UserDependency = Annotated[dict, Depends(get_user)]
+
 @app.post('/resume_upload')
-async def skill_extractor(file: UploadFile = File(...)):
+async def skill_extractor(user: UserDependency, file: UploadFile = File(...)):
 
     if file.content_type != "application/pdf":
         raise HTTPException(
@@ -59,94 +69,50 @@ async def skill_extractor(file: UploadFile = File(...)):
         )
 
     model: ChatGoogleGenerativeAI = credentials['gemini_model']
-    parser = PydanticOutputParser(pydantic_object= ResumeOutputSchema)
 
     try:
-        pdf_bytes = await file.read()
-        pdf_stream = io.BytesIO(pdf_bytes)
-
-        context = await pdf_embedding_creator(pdf_stream)
-        if context:
-                prompt = ChatPromptTemplate(
-                    [
-                        ('system',"""
-
-            You are an expert HR Data Extraction Engine. 
-            Your job is to analyze the retrieved resume text provided below and extract the candidate's strongest, 
-            most prominent skills and fields of expertise, and if any internships done.
-
-            ### Instructions:
-            1. Identify technical skills, frameworks, tools, methodologies, and core domain areas where the candidate demonstrates strong proficiency or repeated experience.
-            2. Identify whther the candidate has done any internships or not, if yes state them clearly.
-            3. Rely ONLY on the provided retrieved text. Do not invent or assume any skills not explicitly mentioned or heavily implied by their listed experience.
-            4. Clean the skills (e.g., use standard capitalization like "Python", "React", "AWS").
-
-            {format_instructions}
-            """),
-                    ("human", """The retrieved context is :- 
-                    {context}""")
-                ]
-            ).partial(format_instructions= parser.get_format_instructions())
-                
-                chain = prompt | model | parser
-                response = await chain.ainvoke(
-                    {
-                        "context": context
-                    }
-                )
-                return response
-        else:
-            return {
-                "skills": "No skill found"
-            }    
+        response = await resume_analyzer(user_file= file, func_model= model)
+        user_file_to_store = await resume_storage(file)
+        return response
+    
     except Exception as error:
-        raise HTTPException(status_code= 500, detail= str(error))
+        return HTTPException(status_code= 500, detail= str(error))
 
 @app.post('/initial_assessment')
-async def assessment(fields: List[str]):
+async def first_assessment(user: UserDependency):
 
+    model: ChatMistralAI = credentials['mistral_m_model']
+    fields: List[str] = user['skills']
     try:
-        model: ChatGoogleGenerativeAI = credentials['gemini_model']
-        parser = PydanticOutputParser(pydantic_object= AssessmentSchema)
-        prompt_temp = ChatPromptTemplate.from_messages(
-            [
-                ('system', """
-    You are an expert Educational Assessment Specialist and Curriculum Designer. 
-    Your task is to generate a highly targeted, structured questionnaire based on the fields provided by the user.
-    The user will provide a list of fields, topics, or subjects (e.g., ["Python Programming", "Data Structures"]).
-
-    # Instructions & Rules
-    1. Core Output: You must generate exactly 4 question per field only if the number of question are more than 10. 
-    Othewise, evenly distribute them to generate 12 questions.
-    2. If the fields cannot be divided perfectly, distribute them as evenly as possible.
-    3. Question Types: 
-    - You must mix Multiple Choice Questions (MCQs) and Short Paragraph Questions.
-    - Target an approximate 50/50 split (e.g., 6 MCQs and 6 Short Paragraph questions).
-    4. Format Requirements:
-    - For MCQs: Provide the question, exactly 4 clear options (labeled A, B, C, D) along with it.
-    - For Short Paragraphs: Provide a prompt that requires a 3-5 sentence explanatory response, along with "Key Concepts to Look For" to guide the evaluator.
-    5. Difficulty: Ensure a balanced progression from fundamental concepts to intermediate-level application to 1 advanced question for each field.
-
-    {format_instructions}
-    """),
-                ('human',"""
-    Here is the list of fields :- {fields}
-    """)
-            ]
-        ).partial(format_instructions= parser.get_format_instructions())
-
-        chain: Runnable = prompt_temp | model | parser
-        response = await chain.ainvoke({
-            'fields': fields
-        })
+        response = first_assessment_generator(user_fields= fields, func_model= model)
 
         return response
-
     except Exception as error:
         return HTTPException(status_code= 404, detail= str(error))
 
+@app.get('/oppurtunities')
+async def job_intern_recommender(user: UserDependency, vacancy_type: Literal['Internship', 'Job']) -> Dict:
 
-"""Extract 'field', 'difficulty', 'question_text', 'answer' for each question to start the analysis"""
+        try:
+            config = {"configurable": {"thread_id": user['email']}}
+            initial_state = {
+                "skills": user['skills'],
+                "location": user['location'],
+                "vacancy_type": vacancy_type
+            }
+
+            output = await compiled_graph.ainvoke(initial_state, config= config)
+            roles_availability = output['messages'][-1].content
+            roles = output['current_roles']
+
+            return {
+                "roles_availability": roles_availability,
+                "current_roles": roles
+            }
+        except Exception as err:
+            return {
+                HTTPException(status_code= 500, detail= str(err))
+            }
 
 @app.post('/assessment_score')
 async def assessment_score(test_data: List[Dict[str, str]]):
@@ -209,34 +175,11 @@ Maintain a professional, encouraging, and highly analytical tone throughout the 
 
     return response
 
-@app.get('/oppurtunities')
-async def job_intern_recommender(email: str, vacancy_type: Literal['Internship', 'Job']) -> Dict:
 
-    user: Dict[str, Any] = get_user_db(email)
-    if user:
-        try:
-            config = {"configurable": {"thread_id": user['email']}}
-            initial_state = {
-                "skills": user['skills'],
-                "location": user['location'],
-                "vacancy_type": vacancy_type
-            }
 
-            output = await compiled_graph.ainvoke(initial_state, config= config)
-            roles_availability = output['messages'][-1].content
-            roles = output['current_roles']
-
-            return {
-                "roles_availability": roles_availability,
-                "current_roles": roles
-            }
-        except Exception as err:
-            return {
-                HTTPException(status_code= 500, detail= str(err))
-            }
-    return {
-        HTTPException(status_code= 404, detail= "User cannot be found. PLease sign-up first")
-    }
+@app.post('/career_talk')
+async def chatbot_guide():
+    pass
 
 app.add_middleware(
     CORSMiddleware,

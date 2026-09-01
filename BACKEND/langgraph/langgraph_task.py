@@ -6,7 +6,6 @@ from typing import Dict, List, TypedDict, Literal, Annotated, Any
 from langchain_mistralai import ChatMistralAI
 from tavily import AsyncTavilyClient
 from langchain_core.prompts import PromptTemplate
-from langchain_core.tools import tool
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from backend.schemas.schema import VacanciesSchema
@@ -60,7 +59,7 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         tavily_response = await client.search(
             query= tavily_query,
             search_depth= "advanced",
-            max_results= len(state['skills']),
+            max_results= 5,
             include_domains= career_websites
         )
 
@@ -118,7 +117,7 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         tavily_response = await client.search(
             query=tavily_query,
             search_depth="advanced",
-            max_results=len(state['skills']),
+            max_results=5,
             include_domains=career_websites
         )
         search_result = tavily_response.get('results', [])
