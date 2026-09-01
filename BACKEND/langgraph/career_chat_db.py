@@ -1,7 +1,7 @@
-from ..backend.database.configurations import user_chat_collections
-from ..backend.schemas.user_schema import User
-from ..backend.database.user_db import get_user_data
-from ..backend.schemas.schema import UserChatThreads
+from ..database.configurations import user_chat_collections
+from ..schemas.user_schema import User
+from ..database.user_db import get_user_data
+from ..schemas.schema import UserChatThreads
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_mistralai import ChatMistralAI
 from pydantic import EmailStr

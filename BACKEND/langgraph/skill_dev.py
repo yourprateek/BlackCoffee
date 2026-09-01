@@ -1,16 +1,10 @@
 import httpx
 import os
 from langgraph.graph import StateGraph, START, END
-from langgraph.prebuilt import ToolNode
-from langgraph.graph import add_messages
-from langgraph.checkpoint.memory import MemorySaver
-from typing import Dict, List, TypedDict, Literal, Annotated, Any
+from typing import Dict, List, TypedDict, Any
 from langchain_mistralai import ChatMistralAI
 from tavily import AsyncTavilyClient
 from langchain_core.prompts import PromptTemplate
-from langchain_core.messages import AnyMessage, AIMessage
-from langchain_core.output_parsers import PydanticOutputParser
-from backend.schemas.schema import VacanciesSchema
 from dotenv import load_dotenv
 load_dotenv()
 
