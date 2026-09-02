@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SkillState(TypedDict):
-    free_filter: bool
+    paid_filter: bool
     skill: str
     courses_available: List[Dict[str, Any]]
     summary: str
@@ -31,8 +31,8 @@ courses_domains = [
 ]
 
 def router(state: SkillState) -> str:
-    free_filter = state['free_filter']
-    if free_filter:
+    paid_filter = state['paid_filter']
+    if paid_filter:
         return "web_search"
     return "youtube_search"
 
@@ -63,7 +63,7 @@ async def paid_course_search(state: SkillState):
     prompt = PromptTemplate.from_template(
         template= """
     You are an expert AI Career Counselor and Curriculum Curator. 
-    Your task is to analyze raw search data for a specific skill and transform it into a structured, 
+    Your task is to analyze raw search data for a specific skill/skill and transform it into a structured, 
     highly valuable learning roadmap summary for the user.
 
     You will receive input as a list of dictionaries containing titles, URLs, and text snippets of available courses.
@@ -150,11 +150,11 @@ async def free_course_search(state: SkillState) -> list:
 
     The search data is: {free_courses}
     """
-    )
+    ).partial({
+        "free_courses": free_courses
+    })
 
-    response = await model.ainvoke({
-            "free_courses": free_courses,
-        })
+    response = await model.ainvoke(prompt)
     
     return {
         'courses_available': free_courses,

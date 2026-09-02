@@ -6,14 +6,15 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables import Runnable
 from resume_rag import pdf_embedding_creator, resume_storage
-from backend.database.user_db import get_user_db
-from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import EmailStr
-from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
-from database.user_db import get_user_data
+from schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
+from schemas.user_schema import User
+from database.user_db import get_user_data, add_user_to_db
 from contextlib import asynccontextmanager
-from langgraph.langgraph_task import compiled_graph
+from backend.langgraph.oppurtunities import compiled_graph
+from langgraph.skill_dev import skill_builder
 from typing import Dict, List, Any, Literal, Annotated
 from dotenv import load_dotenv
 load_dotenv()
@@ -21,8 +22,6 @@ load_dotenv()
 credentials = {}
 @asynccontextmanager
 async def site_credentials(app: FastAPI):
-
-    user = get_user_db()
 
     mistral_medium_model = ChatMistralAI(
         model_name= "mistral-medium-latest",
@@ -59,6 +58,74 @@ async def get_user(user_email: EmailStr):
 
 UserDependency = Annotated[dict, Depends(get_user)]
 
+@app.get('/skill_sources')
+async def skill_dev(skill_name: str = Query(
+    default=None,
+    max_length=50,
+    min_length=1,
+    description='Enter skill you want to learn'
+    ),
+    filter_paid_courses: bool = Query(
+        default=True,
+        description="Select paid courses or free courses"
+    )
+):
+    initial_state = {
+        'paid_filter': filter_paid_courses,
+        'skill': skill_name
+    }
+
+    try:
+        response = await skill_builder.ainvoke(initial_state)
+        courses_available = response['courses_available']
+        conclusion = response['summary']
+
+        return {
+            'courses_available': courses_available,
+            'conclusion': conclusion
+        }
+    except Exception as err:
+        raise HTTPException(status_code= 400, detail= str(err))
+
+@app.post('user_account_creation')
+async def create_account(user: User) -> str:
+
+    user_account_dict = user.model_dump()
+    try:
+        add_user_to_db(user_account_dict)
+    except Exception as error:
+        raise HTTPException(status_code=400, detail= str(error))
+    return "Account created successfully."
+
+@app.get('/oppurtunities')
+async def job_intern_recommender(
+    user: UserDependency, 
+    vacancy_type: Literal['Internship', 'Job'],
+    location_filter: bool = Query(
+        default=True,
+        description="Whether to show oppurtunities near you or not"
+    )
+):
+        try:
+            initial_state = {
+                "skills": user['skills'],
+                "location": user['location'],
+                "vacancy_type": vacancy_type
+            }
+
+            output = await compiled_graph.ainvoke(initial_state)
+            roles_availability = output['messages'][-1].content
+            roles = output['current_roles']
+
+            return {
+                "roles_availability": roles_availability,
+                "current_roles": roles
+            }
+        except Exception as err:
+            raise {
+                HTTPException(status_code= 400, detail= str(err))
+            }
+
 @app.post('/resume_upload')
 async def skill_extractor(user: UserDependency, file: UploadFile = File(...)):
 
@@ -76,10 +143,10 @@ async def skill_extractor(user: UserDependency, file: UploadFile = File(...)):
         return response
     
     except Exception as error:
-        return HTTPException(status_code= 500, detail= str(error))
+        raise HTTPException(status_code= 400, detail= str(error))
 
 @app.post('/initial_assessment')
-async def first_assessment(user: UserDependency):
+async def assessment(user: UserDependency):
 
     model: ChatMistralAI = credentials['mistral_m_model']
     fields: List[str] = user['skills']
@@ -88,95 +155,12 @@ async def first_assessment(user: UserDependency):
 
         return response
     except Exception as error:
-        return HTTPException(status_code= 404, detail= str(error))
-
-@app.get('/oppurtunities')
-async def job_intern_recommender(user: UserDependency, vacancy_type: Literal['Internship', 'Job']) -> Dict:
-
-        try:
-            config = {"configurable": {"thread_id": user['email']}}
-            initial_state = {
-                "skills": user['skills'],
-                "location": user['location'],
-                "vacancy_type": vacancy_type
-            }
-
-            output = await compiled_graph.ainvoke(initial_state, config= config)
-            roles_availability = output['messages'][-1].content
-            roles = output['current_roles']
-
-            return {
-                "roles_availability": roles_availability,
-                "current_roles": roles
-            }
-        except Exception as err:
-            return {
-                HTTPException(status_code= 500, detail= str(err))
-            }
+        raise HTTPException(status_code= 404, detail= str(error))
 
 @app.post('/assessment_score')
 async def assessment_score(test_data: List[Dict[str, str]]):
-
     model: ChatGroq = credentials['mistral_s_model']
-    parser = PydanticOutputParser(pydantic_object= AnalysisSchema)
-
-    prompt_template = ChatPromptTemplate.from_messages(
-        [
-            ('system',"""
-You are an expert academic evaluator and question-answer analyst. 
-Your task is to analyze a user's test performance based on a structured list of dictionaries and provide a comprehensive performance report.
-The questions can be either MCQ or paragraph based
-### Input Data Format
-You will receive a Python-style list of dictionaries. Each dictionary represents a single question and contains the following keys:
-- "question_type" : MCQ or Paragraph
-- "question": (string) The text of the question.
-- "difficulty": (string) The difficulty level (e.g., "Basic", "Intermediate", "Advanced").
-- "subject": (string) The specific field or topic of the question.
-- "user_answer": (string or boolean) The answer submitted by the user.
-
-### Output Requirements
-Analyze the data meticulously and generate a response structured EXACTLY in the following four sections. Do not deviate from this order:
-
-1. SCORE OUT OF 100
-This score is evaluated based on the number of correct answer, difficulty level(higher marks for difficult questions.) and question type.
-Higher score to the paragraph question.
-
-2. WEAK AREAS
-- Identify the subjects or difficulty levels where the user struggled the most (lowest accuracy).
-- List specific topics that require immediate review.
-
-3. STRONG AREAS
-- Identify the subjects or difficulty levels where the user excelled (highest accuracy).
-- Highlight specific fields where the user demonstrated mastery.
-
-4. OVERALL SUMMARY
-- Provide a 4-5 sentence holistic evaluation of the user's performance.
-- Synthesize how difficulty levels impacted their accuracy (e.g., "Mastered easy concepts but struggled with time management on harder analytical questions").
-- Conclude with a clear next step or study recommendation to help them improve.
-
-Maintain a professional, encouraging, and highly analytical tone throughout the report.
-
-{format_instructions}
-"""),
-            ('human',"""
-{test_data}
-""")
-        ]
-    ).partial(
-        format_instructions = parser.get_format_instructions()
-    )
-
-    chain: Runnable = prompt_template | model | parser
-    response = await chain.ainvoke(
-        {
-            'test_data': test_data
-        }
-    )
-
-    return response
-
-
-
+    
 @app.post('/career_talk')
 async def chatbot_guide():
     pass

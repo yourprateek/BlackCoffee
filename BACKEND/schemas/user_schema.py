@@ -42,7 +42,6 @@ class Assessment(BaseModel):
 class AssessmentsCompleted(BaseModel):
 
     total_assessments_completed: int
-    assessments_topic: List[str]
     assessmnents: List[Assessment]
 
 class Certificate(BaseModel):
@@ -57,7 +56,7 @@ class Experience(BaseModel):
 
 class UserMetadata(BaseModel):
 
-    resume_file: Optional[Binary]
+    resume_file: Optional[Binary] 
     acc_created_at: datetime
     last_checked_in_at: datetime
 

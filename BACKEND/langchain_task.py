@@ -9,7 +9,7 @@ from resume_rag import pdf_embedding_creator
 from backend.database.user_db import get_user_db
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
-from langgraph.langgraph_task import compiled_graph
+from backend.langgraph.oppurtunities import compiled_graph
 from typing import Dict, List, Any, Literal
 from dotenv import load_dotenv
 load_dotenv()
@@ -55,7 +55,7 @@ async def resume_analyzer(user_file: UploadFile, func_model: ChatGoogleGenerativ
             "skills": "No skill found"
         }
 
-async def first_assessment_generator(user_fields: List[str], func_model: ChatMistralAI):
+async def assessment_generator(user_fields: List[str], func_model: ChatMistralAI):
     
     parser = PydanticOutputParser(pydantic_object= AssessmentSchema)
     prompt_temp = ChatPromptTemplate.from_messages(
@@ -92,5 +92,61 @@ Here is the list of fields :- {fields}
 
     return response
 
-# async def first_assessment_score()
+async def first_assessment_score(assess_data: List[Dict[str, str]], func_model: ChatGroq):
+
+    parser = PydanticOutputParser(pydantic_object= AnalysisSchema)
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            ('system',"""
+You are an expert academic evaluator and question-answer analyst. 
+Your task is to analyze a user's test performance based on a structured list of dictionaries and provide a comprehensive performance report.
+The questions can be either MCQ or paragraph based
+### Input Data Format
+You will receive a Python-style list of dictionaries. Each dictionary represents a single question and contains the following keys:
+- "question_type" : MCQ or Paragraph
+- "question": (string) The text of the question.
+- "difficulty": (string) The difficulty level (e.g., "Basic", "Intermediate", "Advanced").
+- "subject": (string) The specific field or topic of the question.
+- "user_answer": (string or boolean) The answer submitted by the user.
+
+### Output Requirements
+Analyze the data meticulously and generate a response structured EXACTLY in the following four sections. Do not deviate from this order:
+
+1. SCORE OUT OF 100
+This score is evaluated based on the number of correct answer, difficulty level(higher marks for difficult questions.) and question type.
+Higher score to the paragraph question.
+
+2. WEAK AREAS
+- Identify the subjects or difficulty levels where the user struggled the most (lowest accuracy).
+- List specific topics that require immediate review.
+
+3. STRONG AREAS
+- Identify the subjects or difficulty levels where the user excelled (highest accuracy).
+- Highlight specific fields where the user demonstrated mastery.
+
+4. OVERALL SUMMARY
+- Provide a 4-5 sentence holistic evaluation of the user's performance.
+- Synthesize how difficulty levels impacted their accuracy (e.g., "Mastered easy concepts but struggled with time management on harder analytical questions").
+- Conclude with a clear next step or study recommendation to help them improve.
+
+Maintain a professional, encouraging, and highly analytical tone throughout the report.
+
+{format_instructions}
+"""),
+            ('human',"""
+{test_data}
+""")
+        ]
+    ).partial(
+        format_instructions = parser.get_format_instructions()
+    )
+
+    chain: Runnable = prompt_template | func_model | parser
+    response = await chain.ainvoke(
+        {
+            'test_data': assess_data
+        }
+    )
+
+    return response
 
