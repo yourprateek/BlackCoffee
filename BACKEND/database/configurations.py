@@ -7,9 +7,13 @@ uri = "mongodb+srv://sakshu1807_db_user:la7ksVABU1H0cxJz@blackcoffeecluster.7hef
 
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-users_db: Database = client.users_db
+users_db: Database = client.users_database
 
 profiles_collections: Collection = users_db.user_profiles
+profiles_collections.create_index('email', unique= True)
 
-user_chat_collections: Collection = users_db.chats_db
+user_chat_collections: Collection = users_db.chats_collections
+user_chat_collections.create_index('email')
 
+user_docs_collection: Collection = users_db.docs_collections
+user_docs_collection.create_index('email')

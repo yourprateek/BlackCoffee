@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field, AnyHttpUrl, EmailStr
 from enum import Enum
 from typing import List, Dict, Any, Literal, Optional, Tuple
+from uuid import UUID
 
 class QuestionItem(BaseModel):
+    id: str = Field(description="Unique string ID for the question (e.g., q_1, q_2).")
     field: str = Field(
         description="The field/topic this question belongs to."
     )
@@ -18,18 +20,17 @@ class QuestionItem(BaseModel):
         default=None,
         description="For MCQs only. A list of exactly 4 strings labeled A, B, C, D. Leave empty/None for Short Paragraphs.",
     )
-    key_concepts: Optional[List[str]] = Field(
-        default=None,
-        description="For Short Paragraphs only. List of key concepts to look for. Leave empty/None for MCQs.",
-    )
 
 
 class AssessmentSchema(BaseModel):
+    assessment_id: UUID
     questions: List[QuestionItem] = Field(
         description="A list of generated assessment questions."
     )
 
 class AnalysisSchema(BaseModel):
+
+    assessment_id: UUID
     score: int = Field(
         description= "Score based on the assessment answers out of 100"
     )
@@ -43,12 +44,21 @@ class AnalysisSchema(BaseModel):
         description= "A well formatted summary for the user based on his/her performance in the assessment"
     )
 
+class SubmitAssessmentRequest(BaseModel):
+    assessment_id: UUID
+    answers: Dict[str, str] = Field(...,
+        example={"q_1": "A", "q_2": "FastAPI handles routing efficiently."}
+    )
+
 class ResumeOutputSchema(BaseModel):
     skills: List[str] = Field(
         description= "Skills or strong areas exracted from the resume"
     )
     internships: Optional[List[str]] = Field(
         description= "Internships done by the user (if any)"
+    )
+    courses: Optional[List[str]] = Field(
+        description= "The courses done by the user."
     )
 
 class VacancyItem(BaseModel):
@@ -90,4 +100,28 @@ class ThreadDetail(BaseModel):
 class UserChatThreads(BaseModel):
     email: EmailStr
     threads: List[ThreadDetail]
-    
+
+class CareerChatPayload(BaseModel):
+    email: EmailStr
+    message: str
+    thread_title: Optional[str] = None
+
+class CareerChatResponse(BaseModel):
+    reply: str
+    thread_title: str
+
+class FileModel(BaseModel):
+    filename: str
+    file_data: bytes  
+
+class DocumentCollectionSchema(BaseModel):
+
+    email: EmailStr
+    resume: Optional[FileModel] = Field(
+        description="The user's resume",
+        default= None
+    )
+    certificates: List[FileModel] = Field(
+        description="The user's certificates",
+        default= []
+    )

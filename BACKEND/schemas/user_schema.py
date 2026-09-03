@@ -32,31 +32,38 @@ class Education(BaseModel):
 
 class Assessment(BaseModel):
 
-    assessment_id: uuid4
-    assessment_topic: str
-    assessment_questions: List[str]
-    assessment_answers: List[str]
-    assessment_score: int 
-    assessment_overall_summary: str
+    assessment_id: uuid4 = None
+    assessment_topics: str = ''
+    assessment_questions: List[str] = []
+    assessment_answers: List[str] = []
+    assessment_score: int = None
+    assessment_overall_summary: str = ''
 
 class AssessmentsCompleted(BaseModel):
 
-    total_assessments_completed: int
-    assessmnents: List[Assessment]
+    total_assessments_completed: int = 0
+    assessmnents: List[Assessment] = []
 
-class Certificate(BaseModel):
-    filename: str
-    file_data: bytes 
+# class Certificate(BaseModel):
+#     filename: str
+#     file_data: bytes
+
+class Skill(BaseModel):
+    user_skills: List[str] = Field(
+        description= "The skills user claims he/she have achieved."
+    )
+    verified_skills: List[str] = Field(
+        description= "Skils verified after the assessments.",
+        default= []
+    )
 
 class Experience(BaseModel):
 
     internships_done: Optional[List[str]] = []
     courses_completed: Optional[List[str]] = []
-    certifications: Optional[List[Certificate]] = Field(default_factory= List)
 
 class UserMetadata(BaseModel):
-
-    resume_file: Optional[Binary] 
+    
     acc_created_at: datetime
     last_checked_in_at: datetime
 
@@ -76,8 +83,9 @@ class User(BaseModel):
     education: Education = Field(
         description= "The education details of the user"
     )
-    skills: List[str] = Field(
-        description= "Skills acquired/ practiced by the user"
+    skills: Skill = Field(
+        description= "Skills acquired by the user and verified by us.",
+        default= []
     )
     experience: Experience = Field(
         description= "The experience of the user"

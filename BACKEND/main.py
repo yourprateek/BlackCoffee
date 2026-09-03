@@ -1,69 +1,107 @@
-from langchain_task import resume_analyzer, first_assessment_generator
-from langchain_mistralai import ChatMistralAI
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.runnables import Runnable
-from resume_rag import pdf_embedding_creator, resume_storage
+import io
+from langchain_task import resume_analyzer_llm
+from database.configurations import user_chat_collections, profiles_collections, user_docs_collection
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import EmailStr
-from schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
+from schemas.schema import CareerChatPayload
 from schemas.user_schema import User
-from database.user_db import get_user_data, add_user_to_db
-from contextlib import asynccontextmanager
-from backend.langgraph.oppurtunities import compiled_graph
+from database.user_db import (get_user_data, add_user_to_db, update_assessment, 
+update_verified_skills, resume_storage, add_skills_and_exp)
+from langgraph.oppurtunities import compiled_graph
 from langgraph.skill_dev import skill_builder
+from langgraph.career_chat_db import career_chat_graph
+from langgraph.assessment import assessment_builder
 from typing import Dict, List, Any, Literal, Annotated
 from dotenv import load_dotenv
+from uuid import uuid4
+from fastapi.responses import StreamingResponse
 load_dotenv()
 
-credentials = {}
-@asynccontextmanager
-async def site_credentials(app: FastAPI):
-
-    mistral_medium_model = ChatMistralAI(
-        model_name= "mistral-medium-latest",
-        temperature= 0.6
-    )
-
-    gemini_model = ChatGoogleGenerativeAI(
-        model= 'gemini-3-flash-preview'
-    )
-
-    mistral_small_model = ChatMistralAI(
-        model_name= "mistral-small-latest"
-    )
-
-    groq_model = ChatGroq(
-        model= "openai/gpt-oss-120b",
-        temperature= 0.4
-    )
-
-    credentials['mistral_m_model'] = mistral_medium_model
-    credentials['gemini_model'] = gemini_model
-    credentials['mistral_s_model'] = mistral_small_model
-    credentials['groq_model'] = groq_model
-
-    yield credentials
-
-app = FastAPI(title= "BlackCoffee", lifespan= site_credentials)
+app = FastAPI(title= "BlackCoffee")
 
 @app.get('/get_user_info')
-async def get_user(user_email: EmailStr):
-    user_data = get_user_data(email= user_email)
+async def get_user(user_email: EmailStr) -> Dict[str, Any]:
+    user_data = await get_user_data(email= user_email)
 
     return user_data.model_dump()
 
 UserDependency = Annotated[dict, Depends(get_user)]
 
+@app.get('/all_threads')
+async def get_all_threads(user: UserDependency) -> List[str]:
+
+    try:
+        all_chat_threads = await user_chat_collections.find_one(
+            {'email': user['email']},
+            {'email': 0, 'threads': 1}
+        )
+
+        all_thread_titles = [thread['thread_title'] for thread in all_chat_threads]
+        return all_thread_titles
+    except Exception as err:
+        raise HTTPException(status_code= 500, detail= str(err))
+
+@app.get('/user_experience_and_skills')
+async def get_user_exp_and_skills(user: UserDependency):
+
+    try:
+        exp_and_skill = await profiles_collections.find_one(
+            {'email': user['email']},
+            {'email': 0, 'experience': 1, 'skills': 1}
+        )
+        user_courses: List[str] = exp_and_skill.get('experience', {}).get('courses_completed') or []
+        user_internships: List[str] = exp_and_skill.get('experience', {}).get('internships_done') or []
+
+        user_skills: List[str] = exp_and_skill.get('skills', {}).get('user_skills') or []
+        verified_skills: List[str] = exp_and_skill.get('skills', {}).get('verified_skills') or []
+
+        return user_internships, user_courses, user_skills, verified_skills 
+    
+    except Exception as err:
+        raise HTTPException(status_code= 500, detail= str(err))
+
+@app.get('/user_resume')
+async def get_resume(user: UserDependency):
+
+    document = await user_docs_collection.find_one({"email": user['email']}, {"resume": 1})
+    
+    if not document or not document.get("resume"):
+        raise HTTPException(status_code=404, detail="Resume not found for this user.")
+    
+    resume_data = document["resume"]
+
+    return StreamingResponse(
+        io.BytesIO(resume_data["data"]),
+        media_type=resume_data.get("content_type", "application/pdf"),
+        headers={"Content-Disposition": f'attachment; filename="{resume_data["filename"]}"'}
+    )
+
+@app.get('/user_certificates')
+async def get_certificate(user: UserDependency, filename: str):
+
+    document = await user_docs_collection.find_one(
+        {"email": user['email'], "certificates.filename": filename},
+        {"certificates.$": 1}
+    )
+    if not document or not document.get("certificates"):
+        raise HTTPException(status_code=404, detail="Certificate file not found.")
+
+    certificate_data = document["certificates"][0]
+
+    return StreamingResponse(
+        io.BytesIO(certificate_data["data"]),
+        media_type=certificate_data.get("content_type", "application/pdf"),
+        headers={"Content-Disposition": f'attachment; filename="{certificate_data["filename"]}"'}
+    )
+
 @app.get('/skill_sources')
-async def skill_dev(skill_name: str = Query(
-    default=None,
-    max_length=50,
-    min_length=1,
-    description='Enter skill you want to learn'
+async def skill_dev(user: UserDependency,
+    skill_name: str = Query(
+        default=None,
+        max_length=50,
+        min_length=1,
+        description='Enter skill you want to learn'
     ),
     filter_paid_courses: bool = Query(
         default=True,
@@ -76,9 +114,13 @@ async def skill_dev(skill_name: str = Query(
     }
 
     try:
-        response = await skill_builder.ainvoke(initial_state)
-        courses_available = response['courses_available']
-        conclusion = response['summary']
+        config = {"configurable": {"thread_id": str(user['email'])}}
+        await skill_builder.ainvoke(initial_state)
+
+        output = compiled_graph.get_state(config)
+
+        courses_available = output.values.get('courses_available')
+        conclusion = output.values.get('conclusion')
 
         return {
             'courses_available': courses_available,
@@ -87,16 +129,19 @@ async def skill_dev(skill_name: str = Query(
     except Exception as err:
         raise HTTPException(status_code= 400, detail= str(err))
 
-@app.post('user_account_creation')
-async def create_account(user: User) -> str:
+@app.post('/user_account_creation')
+async def create_account(user: User) -> Dict:
 
-    user_account_dict = user.model_dump()
-    try:
-        add_user_to_db(user_account_dict)
-    except Exception as error:
-        raise HTTPException(status_code=400, detail= str(error))
-    return "Account created successfully."
+    resp = await add_user_to_db(user)
 
+    if resp['status_code'] == 400:
+        raise HTTPException(status_code=400, detail=resp['message'])
+    
+    return {
+        'status_code': resp['status_code'],
+        'detail': resp['message']
+    }
+    
 @app.get('/oppurtunities')
 async def job_intern_recommender(
     user: UserDependency, 
@@ -107,14 +152,16 @@ async def job_intern_recommender(
     )
 ):
         try:
+            config = {"configurable": {"thread_id": str(user['email'])}}
             initial_state = {
                 "skills": user['skills'],
                 "location": user['location'],
                 "vacancy_type": vacancy_type
             }
+            await compiled_graph.ainvoke(initial_state, config= config)
 
-            output = await compiled_graph.ainvoke(initial_state)
-            roles_availability = output['messages'][-1].content
+            output = compiled_graph.get_state(config)
+            roles_availability = output.values.get('messages')[-1].content
             roles = output['current_roles']
 
             return {
@@ -135,35 +182,107 @@ async def skill_extractor(user: UserDependency, file: UploadFile = File(...)):
             detail="Invalid file type. Only PDF files are allowed."
         )
 
-    model: ChatGoogleGenerativeAI = credentials['gemini_model']
-
     try:
-        response = await resume_analyzer(user_file= file, func_model= model)
-        user_file_to_store = await resume_storage(file)
-        return response
+        response = await resume_analyzer_llm(user_file= file)
+        await resume_storage(file, user['email'])
+        await add_skills_and_exp(response, user['email'])
     
     except Exception as error:
         raise HTTPException(status_code= 400, detail= str(error))
 
 @app.post('/initial_assessment')
-async def assessment(user: UserDependency):
+async def start_assessment(topics: List[str], user: UserDependency):
 
-    model: ChatMistralAI = credentials['mistral_m_model']
-    fields: List[str] = user['skills']
+    new_assessment_id = uuid4()
+    config = {"configurable": {"thread_id": str(new_assessment_id)}}
+
+    initial_state = {
+        "email": user['email'],
+        "topic": topics,
+        "assessment_id": new_assessment_id,
+        "questions": [],
+        "user_answers": {}
+    }
+
     try:
-        response = first_assessment_generator(user_fields= fields, func_model= model)
+        await assessment_builder.ainvoke(initial_state, config=config)
+        current_state = await assessment_builder.aget_state(config)
 
-        return response
-    except Exception as error:
-        raise HTTPException(status_code= 404, detail= str(error))
-
+        return {
+            "assessment_id": new_assessment_id,
+            "questions": current_state.values.get("questions", [])
+        }
+    except Exception as err:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to initialize assessment framework: {str(err)}"
+        )
+    
 @app.post('/assessment_score')
-async def assessment_score(test_data: List[Dict[str, str]]):
-    model: ChatGroq = credentials['mistral_s_model']
+async def submit_assessment(assessment_id: str, user_answers: Dict[str, str], user: UserDependency):
+
+    config = {"configurable": {"thread_id": str(assessment_id)}}
+    current_state = await assessment_builder.aget_state(config)
+    
+    if not current_state.values:
+        raise HTTPException(
+            status_code=404, 
+            detail="Assessment session not found. It may have expired or the ID is invalid."
+        )
+        
+    await assessment_builder.aupdate_state(config, {"user_answers": user_answers}, as_node="assessment_generator")
+    
+    await assessment_builder.ainvoke(None, config=config)
+
+    final_state = await assessment_builder.aget_state(config)
+    final_report = final_state.values.get("analysis")
+    score = final_report.score
+
+    assessment_data =  {
+            'assessment_id': assessment_id,
+            'assessment_topics': ', '.join(final_state.values.get('topics')),
+            'assessment_questions': final_state.values.get('questions'),
+            'assessment_answers': final_state.values.get('user_answers'),
+            'assessment_score': score,
+            'assessment_overall_summary': final_report.test_summary
+        }
+    resp_1 = await update_assessment(user['email'], assessment_data)
+
+    if score < 75:
+        skill_verification_status = "Sorry! You didn't pass the minimum percentage to verify your skills. "\
+            "Dont worry! Revise your concepts and come again to give the assessment."
+    else:
+        skill_verification_status = "Congratulations! You passed the assessment test. "
+        verified_skills = final_state.values.get('topics')
+        resp_2 = await update_verified_skills(user['email'], verified_skills)
+
+    if resp_1['status_code'] == 500 or resp_2['status_code'] == 500:
+        return {
+        'test_report': final_report,
+        'skill_verification_status': skill_verification_status,
+        'storing_issue': HTTPException(status_code= 500, detail= str(resp_1['message']))
+    }
+    return {
+        'test_report': final_report,
+        'skill_verification_status': skill_verification_status
+    }
     
 @app.post('/career_talk')
-async def chatbot_guide():
-    pass
+async def chatbot_guide(payload: CareerChatPayload):
+    try:
+        result = await career_chat_graph.ainvoke({
+            "email": payload.email,
+            "message": payload.message,
+            "thread_title": payload.thread_title,
+            "messages_history": [],
+            "final_reply": ""
+        })
+        return {
+            "reply": result["final_reply"],
+            "thread_title": result["thread_title"]
+        }
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=str(err))
 
 app.add_middleware(
     CORSMiddleware,

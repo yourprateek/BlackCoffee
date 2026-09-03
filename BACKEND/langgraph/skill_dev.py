@@ -1,6 +1,7 @@
 import httpx
 import os
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
 from typing import Dict, List, TypedDict, Any
 from langchain_mistralai import ChatMistralAI
 from tavily import AsyncTavilyClient
@@ -170,4 +171,5 @@ graph.add_conditional_edges(START, router)
 graph.add_edge("web_search", END)
 graph.add_edge("youtube_search", END)
 
-skill_builder = graph.compile()
+memory = MemorySaver()
+skill_builder = graph.compile(checkpointer= memory)

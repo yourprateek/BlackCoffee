@@ -7,20 +7,20 @@ from langchain_mistralai import ChatMistralAI
 from pydantic import EmailStr
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from typing import List, TypedDict, Optional
+from typing import List, TypedDict, Optional, Annotated
 
 class ChatState(TypedDict):
     email: str
     message: str
     thread_title: Optional[str]  
-    messages_history: List[dict]
+    messages_history: Annotated[List[dict], add_messages]
     final_reply: str
 
 async def chat_history_node(state: ChatState):
 
-    user_doc = user_chat_collections.find_one({"email": email})
-
     email = state["email"].lower().strip()
+    user_doc = user_chat_collections.find_one({"email": email})
+    
     user_msg = state["message"]
     thread_title = state["thread_title"]
 
