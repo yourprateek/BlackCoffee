@@ -7,8 +7,15 @@
     <!-- Assuming base styles are in index.css -->
     <link rel="stylesheet" href="./StyleSheets/index.css">
     <link rel="stylesheet" href="./StyleSheets/login.css">
+    <script>
+        // Apply saved theme before first paint to avoid flash
+        if (localStorage.getItem("theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+        }
+    </script>
     <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <header>
         <span id="website_logo" onclick="window.location.href='index.html'" style="cursor: pointer;">

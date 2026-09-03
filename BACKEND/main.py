@@ -10,10 +10,11 @@ from backend.database.user_db import get_user_db
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import EmailStr
-from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema
+from backend.schemas.schema import AssessmentSchema, AnalysisSchema, ResumeOutputSchema, CareerChatPayload
 from database.user_db import get_user_data
 from contextlib import asynccontextmanager
 from langgraph.langgraph_task import compiled_graph
+from langgraph.career_chat_db import career_chat_graph
 from typing import Dict, List, Any, Literal, Annotated
 from dotenv import load_dotenv
 load_dotenv()
@@ -178,8 +179,21 @@ Maintain a professional, encouraging, and highly analytical tone throughout the 
 
 
 @app.post('/career_talk')
-async def chatbot_guide():
-    pass
+async def chatbot_guide(payload: CareerChatPayload):
+    try:
+        result = await career_chat_graph.ainvoke({
+            "email": payload.email,
+            "message": payload.message,
+            "thread_title": payload.thread_title,
+            "messages_history": [],
+            "final_reply": ""
+        })
+        return {
+            "reply": result["final_reply"],
+            "thread_title": result["thread_title"]
+        }
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=str(err))
 
 app.add_middleware(
     CORSMiddleware,

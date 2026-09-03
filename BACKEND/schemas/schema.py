@@ -90,4 +90,12 @@ class ThreadDetail(BaseModel):
 class UserChatThreads(BaseModel):
     email: EmailStr
     threads: List[ThreadDetail]
-    
+
+class CareerChatPayload(BaseModel):
+    email: EmailStr
+    message: str
+    thread_title: Optional[str] = None
+
+class CareerChatResponse(BaseModel):
+    reply: str
+    thread_title: str
