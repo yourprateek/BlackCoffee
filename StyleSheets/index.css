@@ -3,7 +3,25 @@
     --accent-color: #2563eb;
     --dimmed-accent-color: #1E3A8A;
     --text-color: white;
-    --text-muted: #99acbe;
+    --text-muted: #94a3b8;
+
+    /* Surface colors */
+    --card-bg: #0F172B;
+    --card-bg-alt: #1D293D;
+    --card-border: #2a344d;
+    --border-muted: #334155;
+
+    /* Icon / accent tints */
+    --icon-bg-blue: #1D3163;
+    --icon-color-blue: #60a5fa;
+    --accent-blue-light: #93c5fd;
+    --accent-purple-light: #a875ff;
+    --accent-purple-soft: #d8b4fe;
+    --accent-green: #4ade80;
+
+    /* Structural */
+    --header-border: rgba(255, 255, 255, 0.1);
+
     font-family:
         Roboto,
         system-ui,
@@ -18,6 +36,26 @@
         "Helvetica Neue",
         sans-serif;
 }
+
+[data-theme="light"] {
+    --bg-color: #f0f4ff;
+    --accent-color: #1d4ed8;
+    --dimmed-accent-color: #bfdbfe;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    --card-bg: #ffffff;
+    --card-bg-alt: #e8eef7;
+    --card-border: #cbd5e1;
+    --border-muted: #94a3b8;
+    --icon-bg-blue: #dbeafe;
+    --icon-color-blue: #1d4ed8;
+    --accent-blue-light: #1e40af;
+    --accent-purple-light: #7c3aed;
+    --accent-purple-soft: #6d28d9;
+    --accent-green: #16a34a;
+    --header-border: rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -25,18 +63,24 @@
 
     color: var(--text-color);
 }
+
 #logo {
-    margin: 8px;
+    margin-inline: 8px;
 }
+
 body {
     background-color: var(--bg-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 ::-webkit-scrollbar {
     width: 6px;
 }
+
 ::-webkit-scrollbar-track {
-    background: var(--bg-color); 
+    background: var(--bg-color);
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--text-muted);
     border-radius: 2px;
@@ -52,10 +96,11 @@ header {
     top: 0;
     width: 100%;
 
-    backdrop-filter: blur(10px) brightness(0.6);
+    backdrop-filter: blur(10px) brightness(0.9);
     background-color: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--header-border);
     z-index: 2;
+    transition: border-color 0.3s ease;
 }
 
 #website_logo {
@@ -63,6 +108,7 @@ header {
     align-items: center;
     font-weight: bolder;
     font-size: 20px;
+    cursor: pointer;
 
     #Acad {
         color: var(--text-color);
@@ -98,10 +144,11 @@ nav {
     #theme {
         display: flex;
         align-items: center;
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid #314158;
+        background-color: var(--header-border);
+        border: 1px solid var(--card-border);
         border-radius: 12px;
         padding: 0.5rem;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
 
         &:hover {
             cursor: pointer;
@@ -115,14 +162,54 @@ nav {
     font-size: 16px;
     border: none;
     background-color: var(--accent-color);
+    color: white;
     cursor: pointer;
+}
+
+#login *,
+#home_hero .btn-primary,
+#home_hero .btn-primary * {
+    color: white;
 }
 
 /*------HEADER END------*/
 
 /*-----MAIN START-------*/
 /*--- HERO ---*/
-#home {
+
+.tab {
+    display: none;
+}
+
+.tab.currentTab {
+    display: block;
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+nav button.activeBtn {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+#home_hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 96vh;
+
+    padding: 1rem;
     background:
         radial-gradient(circle at 15% 30%,
             rgba(20, 40, 100, 0.35) 0%,
@@ -132,25 +219,6 @@ nav {
             transparent 45%);
     background-repeat: no-repeat;
     background-size: cover;
-}
-.tab{
-    display: none;
-}
-.tab.currentTab{
-    display: block;
-}
-nav button.activeBtn {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-}
-#home_hero {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 96vh;
-
-    padding: 1rem;
 
     .hero-title {
         font-size: 4.5rem;
@@ -172,7 +240,7 @@ nav button.activeBtn {
     .hero-description {
         font-size: 1.125rem;
         line-height: 1.6;
-        color: #94a3b8;
+        color: var(--text-muted);
         max-width: 48rem;
         margin: 0 auto 2.5rem auto;
     }
@@ -209,8 +277,8 @@ nav button.activeBtn {
     }
 
     .btn-secondary {
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid #334155;
+        background-color: var(--header-border);
+        border: 1px solid var(--border-muted);
 
         &:hover {
             background-color: rgba(255, 255, 255, 0.15);
@@ -244,6 +312,7 @@ nav button.activeBtn {
 .stats-banner {
     background-color: var(--dimmed-accent-color);
     padding: 2rem 8rem;
+    transition: background-color 0.3s ease;
 }
 
 .stats-container {
@@ -279,7 +348,7 @@ nav button.activeBtn {
     }
 }
 
-/*--- STATS END ---
+/*--- STATS END ---*/
 /*--- CARDS ---*/
 
 .roles-section {
@@ -356,8 +425,8 @@ nav button.activeBtn {
 
     .tag {
         background-color: transparent;
-        border: 1px solid #334155;
-        color: #e2e8f0;
+        border: 1px solid var(--border-muted);
+        color: var(--text-color);
         font-size: 0.75rem;
         padding: 6px 12px;
         border-radius: 20px;
@@ -410,7 +479,7 @@ nav button.activeBtn {
         background-color: #9233ea71;
 
         svg path {
-            fill: #a875ff;
+            fill: var(--accent-purple-light);
         }
     }
 }
@@ -453,11 +522,12 @@ nav button.activeBtn {
 
 /*--- CARDS END---*/
 
-/*--- FEATURE CARDS STAERT ---*/
+/*--- FEATURE CARDS START ---*/
 .features-section {
     padding: 80px 3rem;
     margin-inline: auto;
-    background-color: #0F172B;
+    background-color: var(--card-bg);
+    transition: background-color 0.3s ease;
 }
 
 .features-header {
@@ -468,12 +538,12 @@ nav button.activeBtn {
         font-size: 2.25rem;
         font-weight: 700;
         margin-bottom: 12px;
-        color: white;
+        color: var(--text-color);
     }
 
     p {
         font-size: 1.1rem;
-        color: #99acbe;
+        color: var(--text-muted);
     }
 }
 
@@ -484,10 +554,11 @@ nav button.activeBtn {
 }
 
 .feature-card {
-    background-color: #1D293D;
-    border: 1px solid #2a344d;
+    background-color: var(--card-bg-alt);
+    border: 1px solid var(--card-border);
     border-radius: 12px;
     padding: 30px 24px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 
     &:hover {
         border-color: rgba(96, 165, 250, 0.3);
@@ -497,15 +568,16 @@ nav button.activeBtn {
 .icon-box {
     width: 44px;
     height: 44px;
-    background-color: #1D3163;
+    background-color: var(--icon-bg-blue);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    transition: background-color 0.3s ease;
 
     svg path {
-        fill: #60a5fa;
+        fill: var(--icon-color-blue);
     }
 }
 
@@ -513,32 +585,33 @@ nav button.activeBtn {
     font-size: 1.15rem;
     font-weight: 600;
     margin-bottom: 10px;
-    color: white;
+    color: var(--text-color);
 }
 
 .feature-card p {
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #99acbe;
+    color: var(--text-muted);
 }
 
-/*--- FEATURE CARDS EMND ----*/
+/*--- FEATURE CARDS END ----*/
 /*-----MAIN END-------*/
 
 /*-----FOOTER START-------*/
-footer{
+footer {
     padding: 1rem 3rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 0.8rem;
 
-    p{
+    p {
         text-decoration: underline;
         text-underline-offset: 5px;
         color: var(--text-muted);
     }
 }
+
 /*-----FOOTER END-------*/
 
 /*-----LOGIN START------*/
@@ -559,13 +632,14 @@ footer{
 }
 
 .login-card {
-    background-color: #1D293D;
-    border: 1px solid #2a344d;
+    background-color: var(--card-bg-alt);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 2.5rem;
     width: 100%;
     max-width: 420px;
     transition: all 0.3s ease;
+    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Dynamic State Borders matching the Roles Section */
@@ -581,10 +655,11 @@ footer{
 
 .role-toggle {
     display: flex;
-    background-color: #0F172B;
+    background-color: var(--card-bg);
     border-radius: 12px;
     padding: 4px;
     margin-bottom: 2rem;
+    transition: background-color 0.3s ease;
 }
 
 .toggle-btn {
@@ -607,12 +682,12 @@ footer{
 /* Toggle Active States */
 .toggle-btn.active#btn-student {
     background-color: rgba(37, 99, 235, 0.2);
-    color: #60a5fa;
+    color: var(--icon-color-blue);
 }
 
 .toggle-btn.active#btn-recruiter {
     background-color: rgba(147, 51, 234, 0.2);
-    color: #a875ff;
+    color: var(--accent-purple-light);
 }
 
 .form-wrapper form {
@@ -623,12 +698,7 @@ footer{
 
 .form-wrapper form.active-form {
     display: flex;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .form-wrapper h2 {
@@ -645,6 +715,7 @@ footer{
 .input-group {
     position: relative;
     display: flex;
+    gap: 4px;
     align-items: center;
 }
 
@@ -657,14 +728,14 @@ footer{
 .input-group input {
     width: 100%;
     padding: 14px 14px 14px 44px;
-    background-color: #0F172B;
-    border: 1px solid #334155;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-muted);
     border-radius: 12px;
     color: var(--text-color);
     font-family: inherit;
     font-size: 0.95rem;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background-color 0.3s ease;
 }
 
 .input-group input:focus {

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./StyleSheets/index.css">
     <link rel="stylesheet" href="./StyleSheets/career.css">
     <link rel="stylesheet" href="./StyleSheets/profile.css">
+    <link rel="stylesheet" href="./StyleSheets/chat.css">
     <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
 
     <link rel="icon" href="./favicon/favicon.ico" sizes="any">
@@ -28,13 +29,15 @@
             <button onclick="changeTab(homeTab, this)">Home</button>
             <button onclick="changeTab(profileTab, this)">Profile</button>
             <button onclick="window.location.href='https://roadmap.sh/'">Career Graph</button>
-            <button onclick="changeTab(interNJobTab, this)">Intern & Jobs</button>
+            <button onclick="changeTab(interNJobTab, this)">Application</button>
+            <button onclick="changeTab(chatTab, this)">Assistant</button>
         </nav>
         <span id="sign-in-utility">
             <button id="theme">
                 <img src="./svg/sun.svg" alt="theme-change" style="height: 1.2em;">
             </button>
-            <button id="login" onclick="window.location.href= 'login.html';">Get Started <i class="fa-solid fa-angle-right"></i></button>
+            <button id="login" onclick="window.location.href= 'login.html';">Get Started <i
+                    class="fa-solid fa-angle-right"></i></button>
         </span>
     </header>
 
@@ -211,15 +214,6 @@
                 </div>
             </div>
 
-            <div class="score-wrap">
-                <div class="score-ring">
-                    <div class="score-center">
-                        <strong>0</strong>
-                    </div>
-                </div>
-                <div class="score-label">Profile Score</div>
-            </div>
-
             <div class="hero-stats">
                 <div class="hero-stat">
                     <span class="stat-icon">◎</span>
@@ -278,7 +272,7 @@
             <svg viewBox="0 0 24 24">
                 <path
                     d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.5 8.5 0 0 1-3.7-.8L4 20l1.7-3.4A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" />
-            </svg>    
+            </svg>
         </button>
 
         <div class="chat-popup" id="chatPopup">
@@ -305,6 +299,63 @@
 
     </main>
 
+    <!-- AI Career Chat Tab -->
+    <main class="tab" id="chat">
+        <div class="chat-layout">
+
+            <!-- Sidebar -->
+            <aside class="chat-sidebar">
+                <button class="new-chat-btn" id="newChatBtn" onclick="newChat()">
+                    <i class="fa-solid fa-plus"></i> New Chat
+                </button>
+
+                <span class="sidebar-section-label">Recent</span>
+
+                <div class="thread-list" id="threadList">
+                    <!-- Thread items injected by chat.js -->
+                </div>
+
+                <div class="chat-session-info">
+                    <div class="session-avatar">&#128100;</div>
+                    <span class="session-email" id="sessionEmail">guest@acadbridge.dev</span>
+                </div>
+            </aside>
+
+            <!-- Main chat area -->
+            <div class="chat-main">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-welcome" id="chatWelcome">
+                        <div class="welcome-icon">&#127891;</div>
+                        <h2>AI Career Counselor</h2>
+                        <p>Ask me anything about your career path, skill roadmaps, job market trends, or internship
+                            opportunities.</p>
+                        <div class="suggestion-chips">
+                            <button class="chip" onclick="sendSuggestion(this)">What skills should I learn
+                                next?</button>
+                            <button class="chip" onclick="sendSuggestion(this)">Help me plan my career roadmap</button>
+                            <button class="chip" onclick="sendSuggestion(this)">What internships suit my
+                                profile?</button>
+                            <button class="chip" onclick="sendSuggestion(this)">Review my current skill set</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Bar -->
+                <div class="chat-input-bar">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chatInput" placeholder="Ask your AI career counselor..." rows="1"></textarea>
+                        <button id="chatSendBtn" onclick="sendMessage()" aria-label="Send message">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <p class="chat-disclaimer">AcadBridge AI may make mistakes. Always verify important career decisions
+                        independently.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
     <footer>
         <span id="website_logo">
             <img src="./favicon/favicon.svg" alt="favicon icon" id="logo" style="height: 2em;">
@@ -314,6 +365,7 @@
         <p>© 2026 AcadBridge. All rights reserved. Made by BlackCoffee</p>
     </footer>
     <script src="./JavaScript/index.js"></script>
+    <script src="./JavaScript/chat.js"></script>
     <!-- <script src="./JavaScript/career.js"></script> -->
 </body>
 

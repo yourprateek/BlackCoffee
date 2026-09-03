@@ -18,11 +18,11 @@ class ChatState(TypedDict):
 
 async def chat_history_node(state: ChatState):
 
-    user_doc = user_chat_collections.find_one({"email": email})
-
-    email = state["email"].lower().strip()
+    email = state["email"].lower().strip()       # fix: assign before use
     user_msg = state["message"]
     thread_title = state["thread_title"]
+
+    user_doc = user_chat_collections.find_one({"email": email})
 
     if not user_doc:
         user_doc = {"email": email, "threads": []}
