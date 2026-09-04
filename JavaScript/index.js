@@ -37,6 +37,8 @@ const chatTab = document.getElementById("chat");
 let currentTab = homeTab;
 const homeBtn = document.querySelector("nav button");
 
+const footerEl = document.querySelector("footer");
+
 function changeTab(newTab, clickedButton) {
     currentTab.classList.remove("currentTab");
     currentTab = newTab;
@@ -45,7 +47,18 @@ function changeTab(newTab, clickedButton) {
     document.querySelectorAll("nav button").forEach(btn =>
         btn.classList.remove("activeBtn")
     );
-    clickedButton.classList.add("activeBtn");
+    if (clickedButton) {
+        clickedButton.classList.add("activeBtn");
+    }
+
+    // Hide footer on Assistant (Chat) and Career Graph tabs
+    if (footerEl) {
+        if (newTab === chatTab || newTab === careerGraphTab) {
+            footerEl.style.display = "none";
+        } else {
+            footerEl.style.display = "";
+        }
+    }
 }
 changeTab(homeTab, homeBtn);     //this one is for getting home page when refreshed
 
@@ -89,3 +102,11 @@ if (chatBtn && chatPopup && closeChat) {
     }
 }
 
+// ---- ROADMAP TAB SWITCHER ----
+function switchRoadmap(role, btn) {
+    document.querySelectorAll('.roadmap').forEach(r => r.classList.remove('active'));
+    document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('roadmap-' + role).classList.add('active');
+    btn.classList.add('active');
+}
+// ---- ROADMAP TAB SWITCHER END ----
