@@ -26,7 +26,8 @@ async def retriever_task(vector_store: Chroma) -> str | None:
             retriever= retriever
         )
 
-        query = "What are the candidate's core areas of expertise and strongest professional skills based on their experience or internships?"
+        query = "What are the candidate's core areas of expertise and strongest professional skills based on their experience or internships?"\
+        "Also, include any courses if they had some."
         retrieved_docs: List[Document] = await multi_queries.ainvoke(query)
 
         content = [doc.page_content for doc in retrieved_docs]

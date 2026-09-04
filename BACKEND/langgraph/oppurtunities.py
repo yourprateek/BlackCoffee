@@ -18,7 +18,6 @@ class ResearchVacancyState(TypedDict):
     vacancy_type: Literal['Internship', 'Job']
     messages: Annotated[List[AnyMessage], add_messages]
     current_roles: List[Dict[str,Any]]
-    load_more: bool
 
 career_websites = [
         "linkedin.com",
@@ -54,12 +53,12 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         skills_query = " OR ".join([f'"{skill}"' for skill in state['skills']])
         location_filter = f'"{state["location"]}"' if state.get('location') else ""
     
-        tavily_query = f'({skills_query}) {location_filter} internship -job -full-time -senior'.strip()
+        tavily_query = f'({skills_query}) {location_filter} internship -job -full-time -senior find the oppurtunities near to the location'
         
         tavily_response = await client.search(
             query= tavily_query,
             search_depth= "advanced",
-            max_results= 5,
+            max_results= 6,
             include_domains= career_websites
         )
 
@@ -76,6 +75,10 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
 
         prompt = PromptTemplate.from_template(
             template= """You will be provided with the web searched internship openings.
+            The user attributes are :- 
+            skills :- {skills_query}
+            location :- {location_filter}
+            For matching score, analyze the similarity between the openings and the user attributes(score out of 100).
             Carefully, extract the following attributes from each opening.
             {format_instructions}
 
@@ -111,13 +114,12 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
 
     try:
         skills_query = " OR ".join([f'"{skill}"' for skill in state['skills']])
-        location_filter = f'"{state["location"]}"' if state.get('location') else ""
-        tavily_query = f'({skills_query}) {location_filter} job vacancy hiring -internship -coop -stipend'.strip()
+        tavily_query = f'({skills_query}) job vacancy hiring -internship -coop -stipend'.strip()
         
         tavily_response = await client.search(
             query=tavily_query,
             search_depth="advanced",
-            max_results=5,
+            max_results=6,
             include_domains=career_websites
         )
         search_result = tavily_response.get('results', [])
@@ -136,8 +138,11 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         prompt = PromptTemplate.from_template(
             template="""You are an AI career expert parsing raw web data.
             Extract the active full-time job vacancies into the requested structured format.
+            The user attributes are :- 
+            skills :- {skills_query}
+            location :- {location_filter}
             Ensure you filter out any stray internship or short-term training listings.
-            
+            For the matching_score, analyze the similarity between the jobs and the user attributes(score out of 100).
             {format_instructions}
 
             Raw search data:
