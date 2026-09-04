@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="./StyleSheets/career.css">
     <link rel="stylesheet" href="./StyleSheets/profile.css">
     <link rel="stylesheet" href="./StyleSheets/chat.css">
+    <link rel="stylesheet" href="./StyleSheets/application.css">
     <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
 
     <link rel="icon" href="./favicon/favicon.ico" sizes="any">
@@ -293,10 +294,67 @@
             </div>
         </div>
     </main> -->
-
     <!-- Internships and Jobs Portal-->
     <main class="tab" id="internNJob">
+<!-- <div class="breadcrumb">Home <span>/</span> Jobs & Internships</div>
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">ACADEMBRIDGE CAREER MATCHING</div>
+        <h1>Find Opportunities <em>Built For You</em></h1>
+        <p>Discover jobs and internships matched to your skills, goals and preferences.</p>
+      </div>
+      <div class="profile-match"><span>✦</span><div><strong>Profile Match Active</strong><small>Personalized using your AcadBridge profile</small></div></div>
+    </header> -->
 
+    <section class="type-switcher">
+      <button class="type-btn active" data-type="jobs"><span>💼</span><div><strong>Jobs</strong><small>Full-time & part-time opportunities</small></div></button>
+      <button class="type-btn" data-type="internships"><span>🎓</span><div><strong>Internships</strong><small>Student opportunities & training</small></div></button>
+    </section>
+
+    <section class="search-panel">
+      <div class="search-field"><label>Search</label><div>⌕<input id="searchInput" placeholder="Search jobs, internships, roles or skills..."></div></div>
+      <div class="search-field location-field"><label>Location</label><div>⌖<input id="locationInput" placeholder="Location"></div></div>
+      <button class="primary-btn" id="searchBtn">Search Opportunities <span>→</span></button>
+    </section>
+
+    <div class="mobile-toolbar">
+      <button class="outline-btn" id="filterOpen">☷ Filters</button>
+      <select id="mobileSort"><option>Best Match</option><option>Newest</option><option>Highest Salary</option><option>Deadline Soon</option></select>
+    </div>
+    <div class="layout">
+      <aside class="filters" id="filterSidebar">
+        <div class="filter-head"><div><h3>Filters</h3><small>Refine your opportunities</small></div><button id="filterClose">×</button></div>
+        <div class="filter-group"><h4>Opportunity Type</h4><label><input type="checkbox" value="jobs" class="type-filter"> Jobs</label><label><input type="checkbox" value="internships" class="type-filter"> Internships</label></div>
+        <div class="filter-group"><h4>Work Mode</h4><label><input type="checkbox" value="Remote" class="mode-filter"> Remote</label><label><input type="checkbox" value="Hybrid" class="mode-filter"> Hybrid</label><label><input type="checkbox" value="On-site" class="mode-filter"> On-site</label></div>
+        <div class="filter-group"><h4>Role</h4><select id="roleFilter"><option value="">All roles</option><option>Frontend</option><option>Backend</option><option>Data</option><option>AI / ML</option><option>Product</option></select></div>
+        <div class="filter-group"><h4>Skills</h4><div class="chips"><button data-skill="JavaScript">JavaScript</button><button data-skill="Python">Python</button><button data-skill="React">React</button><button data-skill="Node.js">Node.js</button></div></div>
+        <div class="filter-group"><h4>Date Posted</h4><label><input type="radio" name="date" value="7"> Last week</label><label><input type="radio" name="date" value="30"> Last month</label></div>
+        <div class="filter-actions"><button class="primary-btn" id="applyFilters">Apply Filters</button><button class="text-btn" id="clearFilters">Clear All</button></div>
+      </aside>
+
+      <section class="results">
+        <section class="recommendation">
+          <div class="section-title"><div><div class="eyebrow">PERSONALIZED FEED</div><h2>🎯 Recommended For You</h2><p>Based on your profile, skills and career preferences.</p></div><div class="sort">Sort by <select id="sortSelect"><option>Best Match</option><option>Newest</option><option>Highest Salary</option><option>Highest Stipend</option><option>Deadline Soon</option><option>Most Relevant</option></select></div></div>
+          <div class="cards" id="cards"></div>
+          <div class="empty" id="emptyState" hidden><div>⌕</div><h3>No opportunities found</h3><p>Try changing your search or filters.</p></div>
+        </section>
+
+        <section class="skill-gap">
+          <div class="gap-icon">✦</div>
+          <div class="gap-content"><div class="eyebrow">SMART SKILL GAP</div><h2>You're close!</h2><p>You already have <b>JavaScript</b>, <b>React</b> and <b>Git</b>.</p><p>You're missing <span class="warning">TypeScript</span> and <span class="warning">Testing</span>.</p></div>
+          <div class="gap-score"><strong>91%</strong><span>potential match</span><button class="outline-btn" id="learningBtn">View Recommended Learning →</button></div>
+        </section>
+
+        <section class="lower-sections">
+          <div class="panel"><div class="section-title compact"><div><h2>♡ Saved Jobs</h2><p>Your saved opportunities.</p></div></div><div id="savedList" class="mini-list"></div></div>
+          <div class="panel"><div class="section-title compact"><div><h2>My Applications</h2><p>Track your career progress.</p></div></div><div class="status-flow"><span>Saved</span> → <span>Applied</span> → <span>Screening</span> → <span>Interview</span> → <b>Selected</b></div><div id="applicationsList" class="mini-list"></div></div>
+        </section>
+      </section>
+    </div>
+    <div class="overlay" id="overlay"></div>
+  <div class="modal details-modal" id="detailsModal"><button class="modal-close">×</button><div id="detailsContent"></div></div>
+  <div class="modal wizard" id="wizardModal"><div id="wizardContent"></div></div>
+  <div class="toast" id="toast"></div>
     </main>
 
     <!-- AI Career Chat Tab -->
@@ -366,6 +424,7 @@
     </footer>
     <script src="./JavaScript/index.js"></script>
     <script src="./JavaScript/chat.js"></script>
+    <script src="./JavaScript/application.js"></script>
     <!-- <script src="./JavaScript/career.js"></script> -->
 </body>
 

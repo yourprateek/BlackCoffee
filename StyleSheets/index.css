@@ -22,6 +22,21 @@
     /* Structural */
     --header-border: rgba(255, 255, 255, 0.1);
 
+    /*for application*/
+  --primary: var(--accent-color);
+  --primary-dark: var(--dimmed-accent-color);
+  --secondary: var(--icon-bg-blue);
+  --background: var(--bg-color);
+  --surface: var(--card-bg);
+  --text-primary: var(--text-color);
+  --text-secondary: var(--text-muted);
+  --border: var(--card-border);
+  --accent: var(--accent-color);
+  --success: var(--accent-green);
+  --warning: #fbbf24;
+  --shadow: 0 10px 30px rgba(0,0,0,.25);
+   
+
     font-family:
         Roboto,
         system-ui,
