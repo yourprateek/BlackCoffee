@@ -24,6 +24,8 @@ async def chat_history_node(state: ChatState):
     user_msg = state["message"]
     thread_title = state["thread_title"]
 
+    user_doc = user_chat_collections.find_one({"email": email})
+
     if not user_doc:
         user_doc = {"email": email, "threads": []}
         user_chat_collections.insert_one(user_doc)

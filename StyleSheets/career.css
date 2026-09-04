@@ -1,0 +1,110 @@
+#careerGraph {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    background-size: 26px 26px;
+}
+
+/* Placeholder for later — filters, search, XP summary etc. */
+#graph-sidebar {
+    width: 0;
+}
+
+#graph-viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    cursor: grab;
+}
+
+#graph-viewport.grabbing {
+    cursor: grabbing;
+}
+
+#graph-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+}
+
+#graph-connectors {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.connector-line {
+    stroke: #3fd0c9;
+    stroke-width: 2;
+    fill: none;
+}
+
+#graph-nodes {
+    position: relative;
+}
+
+.node {
+    position: absolute;
+    width: 260px;
+    min-height: 120px;
+    background: linear-gradient(160deg, #1d3fcf, #3b2fce);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.node.start {
+    background: linear-gradient(160deg, #1447e6, #2563eb);
+}
+
+.node.milestone {
+    background: linear-gradient(160deg, #4a3405, #6b4c05);
+    border-color: rgba(250, 204, 21, 0.55);
+}
+
+.node-category {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    color: #cfe0ff;
+}
+
+.node.milestone .node-category {
+    background: rgba(250, 204, 21, 0.15);
+    color: #fde68a;
+}
+
+.node-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.node-desc {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.75);
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.node-hours {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
