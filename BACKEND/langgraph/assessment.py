@@ -1,12 +1,11 @@
 import json
-from ..database.configurations import user_chat_collections
-from ..schemas.user_schema import User
-from ..database.user_db import get_user_data
-from ..schemas.schema import QuestionItem, AssessmentSchema, AnalysisSchema
+from database.configurations import user_chat_collections
+from schemas.user_schema import User
+from database.user_db import get_user_data
+from schemas.schema import QuestionItem, AssessmentSchema, AnalysisSchema, GeneratedQuestions
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
-from langchain_mistralai import ChatMistralAI
 from langchain_groq import ChatGroq
 from pydantic import EmailStr, BaseModel
 from langgraph.graph import StateGraph, START, END
@@ -15,7 +14,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from typing import List, TypedDict, Optional, Annotated, Dict
 from uuid import UUID
 
-class AssessmentState(BaseModel):
+class AssessmentState(TypedDict):
     email: EmailStr
     topics: List[str]
     assessment_id: Optional[UUID] = None
@@ -25,11 +24,11 @@ class AssessmentState(BaseModel):
 
 async def assessment_generator(state: AssessmentState):
 
-    func_model = ChatMistralAI(
-        model_name= 'mistral-medium-latest',
-        temperature= 0.65
-    )
-    parser = PydanticOutputParser(pydantic_object= AssessmentSchema)
+    func_model = ChatGroq(
+            model= 'openai/gpt-oss-120b',
+            temperature= 0.1
+        )
+    parser = PydanticOutputParser(pydantic_object= GeneratedQuestions)
     prompt_temp = ChatPromptTemplate.from_messages(
         [
             ('system', """
@@ -57,7 +56,7 @@ Here is the list of fields :- {fields}
     ).partial(format_instructions= parser.get_format_instructions())
 
     chain: Runnable = prompt_temp | func_model | parser
-    result: AssessmentSchema = await chain.ainvoke({"fields": state.topics})
+    result: AssessmentSchema = await chain.ainvoke({"fields": state['topics']})
     return {
         'questions': result.questions
     }
@@ -119,8 +118,8 @@ Maintain a professional, encouraging, and highly analytical tone throughout the 
     chain: Runnable = prompt_template | func_model | parser
 
     formatted_test_data = []
-    for q in state.questions:
-        user_ans = state.user_answers.get(q.id, "No answer provided")
+    for q in state['questions']:
+        user_ans = state['user_answers'].get(q.id, "No answer provided")
         test_item = {
             "question_type": q.question_type,
             "question": q.question_text,
@@ -133,7 +132,7 @@ Maintain a professional, encouraging, and highly analytical tone throughout the 
     test_data_string = json.dumps(formatted_test_data, indent=2)
     result: AnalysisSchema = await chain.ainvoke({"test_data": test_data_string})
 
-    result.assessment_id = state.assessment_id
+    result.assessment_id = state['assessment_id']
     return {
         'analysis': result
     }
