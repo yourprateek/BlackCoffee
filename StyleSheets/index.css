@@ -38,65 +38,71 @@
 }
 
 .advisor-teaser {
-  display: flex;
-  align-items: center;
-  gap: 48px;
-  max-width: 1100px;
-  margin: 30px auto;
-  padding: 100px;
-  background: var(--bg-secondary, rgba(59,89,224,0.08));
-  border: 1px solid var(--border-color, rgba(255,255,255,0.08));
-  border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 100px;
+    background: var(--bg-secondary, rgba(59, 89, 224, 0.08));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 16px;
 }
+
 .advisor-tag {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #8b9dff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8b9dff;
 }
+
 .advisor-content h2 {
-  font-size: 32px;
-  margin: 8px 0 16px;
-  color: var(--text-primary);
+    font-size: 32px;
+    margin: 8px 0 16px;
+    color: var(--text-primary);
 }
+
 .advisor-content p {
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 24px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 24px;
 }
+
 .advisor-content button {
-  background: #3b59e0;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
+    background: #3b59e0;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
 }
+
 @media (max-width: 768px) {
-  .advisor-teaser { flex-direction: column; padding: 24px; }
+    .advisor-teaser {
+        flex-direction: column;
+        padding: 24px;
+    }
 }
 
 .trust-badges {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin: 20px 0 32px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 20px 0 32px;
+    flex-wrap: wrap;
 }
+
 .trust-badges span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  background: var(--bg-tertiary, rgba(0,0,0,0.03));
-  border: 1px solid var(--border-color);
-  padding: 6px 14px;
-  border-radius: 999px;
-}
-.trust-badges i {
-  color: var(--accent-color, #3b59e0);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary, rgba(0, 0, 0, 0.03));
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 999px;
 }
 
 [data-theme="light"] {
@@ -191,6 +197,10 @@ nav {
         background-color: transparent;
         border: none;
         cursor: pointer;
+
+        a {
+            text-decoration: none;
+        }
 
         &:hover {
             text-decoration: underline;
