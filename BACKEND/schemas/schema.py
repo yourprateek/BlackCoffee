@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field, AnyHttpUrl, EmailStr
-from enum import Enum
-from typing import List, Dict, Any, Literal, Optional, Tuple
+from pydantic import BaseModel, Field, EmailStr
+from typing import List, Dict, Any, Literal, Optional
 from uuid import UUID
 
 class QuestionItem(BaseModel):
@@ -23,10 +22,22 @@ class QuestionItem(BaseModel):
 
 
 class AssessmentSchema(BaseModel):
-    assessment_id: UUID
-    questions: List[QuestionItem] = Field(
-        description="A list of generated assessment questions."
+
+    assessment_id: str = Field(description="The string version of the assessment UUID")
+    assessment_topics: str = Field(description="Comma-separated string of topics tested")
+    assessment_questions: List[QuestionItem] = Field(
+        description="A list of the fully generated assessment question items."
     )
+
+    assessment_answers: Dict[str, str] = Field(
+        description="Dictionary mapping question IDs to the user's provided answers."
+    )
+    
+    assessment_score: int = Field(description="The final test score achieved out of 100")
+    assessment_overall_summary: str = Field(description="The comprehensive summary report text")
+
+class GeneratedQuestions(BaseModel):
+    questions: List[QuestionItem]
 
 class AnalysisSchema(BaseModel):
 
@@ -63,33 +74,47 @@ class ResumeOutputSchema(BaseModel):
 
 class VacancyItem(BaseModel):
     role_title: str = Field(
-        description= "The title of the internship/jobs"
+        description="The title of the internship/jobs"
     )
-    company_name: str = Field(
-        description= "The name of the company"
+    
+    #  FIX 1: Changed to Optional[str] so it accepts null if company is missing from the search snippet
+    company_name: Optional[str] = Field(
+        default=None,
+        description="The name of the company"
     )
-    work_location_type: Literal['Remote', 'Hybrid', 'On-site'] = Field(
-        description= "The location type of the internship/jobs"
+    
+    #  FIX 2: Made Optional and allowed None so stray values don't break the Literal restriction
+    work_location_type: Optional[Literal['Remote', 'Hybrid', 'On-site']] = Field(
+        default=None,
+        description="The location type of the internship/jobs"
     )
+    
     location: Optional[str] = Field(
-            description= "The location of the internship/jobs"
-        )
-    url: AnyHttpUrl = Field(
-        decimal_places= "The source url of the internship/jobs vacancy"
+        default=None,
+        description="The location of the internship/jobs"
     )
-    income_type: Literal['stipend', 'unpaid', 'salary'] = Field(
-        decimal_places= "Whether the internship/jobs is paid or not"
+    
+    url: str = Field(
+        description="The source url of the internship/jobs vacancy"
     )
+    
+    income_type: Optional[Literal['stipend', 'unpaid', 'salary']] = Field(
+        default=None,
+        description="Whether the internship/jobs is paid or not"
+    )
+    
     deadline: Optional[str] = Field(
-        description= "A short bullet point if visible in the text as a deadline"
+        default=None,
+        description="A short bullet point if visible in the text as a deadline"
     )
+    
     matching_score: float = Field(
-        description= "How much does the user potrfolio and the vacancy is matching out of 100."
+        description="How much does the user portfolio and the vacancy match out of 100."
     )
 
 class VacanciesSchema(BaseModel):
     vacancies: List[VacancyItem] = Field(
-        description= "A list of all the internship/jobs vacancies available"
+        description="A list of all the internship/jobs vacancies available"
     )
 
 class MessageType(BaseModel):
@@ -114,7 +139,7 @@ class CareerChatResponse(BaseModel):
     thread_title: str
 
 class FileModel(BaseModel):
-    filename: str
+    file_name: str
     file_data: bytes  
 
 class DocumentCollectionSchema(BaseModel):

@@ -1,52 +1,57 @@
 import io
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.runnables import Runnable
-from resume_rag import pdf_embedding_creator
 from fastapi import UploadFile
-from backend.schemas.schema import ResumeOutputSchema
+from pypdf import PdfReader
+from langchain_google_genai import ChatGoogleGenerativeAI
+from schemas.schema import ResumeOutputSchema
 from dotenv import load_dotenv
+
 load_dotenv()
 
-async def resume_analyzer_llm(user_file: UploadFile):
-
-    parser = PydanticOutputParser(pydantic_object= ResumeOutputSchema)
-    func_model = ChatGoogleGenerativeAI(
-        model = 'gemini-3-flash-preview'
-    )
+async def resume_analyzer_llm(user_file: UploadFile) -> ResumeOutputSchema:
     pdf_bytes = await user_file.read()
     pdf_stream = io.BytesIO(pdf_bytes)
 
-    context = await pdf_embedding_creator(pdf_stream)
-    if context:
-            prompt = ChatPromptTemplate(
-                [
-                    ('system',"""
+    reader = PdfReader(pdf_stream)
+    extracted_text = " ".join([page.extract_text() or "" for page in reader.pages]).strip()
 
-        You are an expert HR Data Extraction Engine. 
-        Your job is to analyze the retrieved resume text provided below and extract the candidate's strongest, 
-        most prominent skills and fields of expertise, and if any internships done.
+    if not extracted_text:
+        raise ValueError("Could not extract any text from the uploaded PDF.")
 
-        ### Instructions:
-        1. Identify technical skills, frameworks, tools, methodologies, and core domain areas where the candidate demonstrates strong proficiency or repeated experience.
-        2. Identify whther the candidate has done any internships or not, if yes state them clearly.
-        3. Rely ONLY on the provided retrieved text. Do not invent or assume any skills not explicitly mentioned or heavily implied by their listed experience.
-        4. Clean the skills (e.g., use standard capitalization like "Python", "React", "AWS").
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        temperature=0.1
+    )
+    structured_llm = llm.with_structured_output(ResumeOutputSchema)
 
-        {format_instructions}
-        """),
-                ("human", """The retrieved context is :- 
-                {context}""")
-            ]
-        ).partial(format_instructions= parser.get_format_instructions())
-            
-            chain: Runnable = prompt | func_model | parser
-            response = await chain.ainvoke(
-                {
-                    "context": context
-                }
-            )
-            return response
-    else:
-        raise ValueError('An unknown error occurred')
+    prompt = f"""
+    You are a universal HR recruitment and taxonomy engine capable of parsing resumes across any professional discipline (Engineering, Business, Design, Healthcare, Finance, Humanities, etc.).
+
+Analyze the resume text and extract the candidate's core competencies using the following universal normalization rules:
+
+### Universal Skill Normalization Guidelines:
+1. **Broader Umbrella Normalization**:
+   - Consolidate micro-techniques, hyper-specific architectures, single formula names, or niche sub-components into their standard discipline-level umbrella.
+   - Examples:
+     * *Tech:* "GRU", "LSTM", "RNN" -> Roll up into **Deep Learning** or **Natural Language Processing**.
+     * *Finance:* "DCF", "LBO", "Comparable Company Analysis" -> Roll up into **Financial Modeling** or **Valuation**.
+     * *Marketing:* "A/B Testing", "CTR Optimization", "Meta Pixel" -> Roll up into **Performance Marketing** or **Conversion Rate Optimization (CRO)**.
+     * *Design:* "Kerning", "Grid Systems", "Moodboards" -> Roll up into **Typography** or **Visual Design**.
+   - Keep flagship, industry-standard tools and platforms explicit (e.g., "Python", "SQL", "Figma", "Bloomberg Terminal", "Salesforce", "AutoCAD").
+
+2. **Exclude Meta-Headers and Vague Boilerplate**:
+   - Strip out category labels, document headers, and generic task descriptions (e.g., DO NOT extract: "Python Libraries", "Tools Used", "Predictive models", "Client communication", "Team player", "Basic computer knowledge").
+
+3. **Industry Standard Naming & Deduplication**:
+   - Eliminate redundant phrasing (e.g., avoid having both "ML" and "Machine Learning"; choose the canonical standard name).
+   - Use standard professional capitalization and acronym conventions.
+
+4. **Conciseness & High Signal**:
+   - Prioritize high-signal, macro competencies.
+   - Avoid bloated lists: aim for roughly 6 to 12 distinct, high-impact skills or recognized tools that define the candidate's core domain.
+
+### Resume Text:
+{extracted_text}
+    """
+
+    response = await structured_llm.ainvoke(prompt)
+    return response

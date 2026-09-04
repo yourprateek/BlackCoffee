@@ -1,14 +1,15 @@
+import asyncio
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from langgraph.graph import add_messages
 from langgraph.checkpoint.memory import MemorySaver
 from typing import Dict, List, TypedDict, Literal, Annotated, Any
-from langchain_mistralai import ChatMistralAI
+from langchain_groq import ChatGroq
 from tavily import AsyncTavilyClient
 from langchain_core.prompts import PromptTemplate
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.output_parsers import PydanticOutputParser
-from backend.schemas.schema import VacanciesSchema
+from schemas.schema import VacanciesSchema
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -51,7 +52,7 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
     
     try:
         skills_query = " OR ".join([f'"{skill}"' for skill in state['skills']])
-        location_filter = f'"{state["location"]}"' if state.get('location') else ""
+        location_filter = f'"{state['location']}" "India"' if state['location'] else '"India"'
     
         tavily_query = f'({skills_query}) {location_filter} internship -job -full-time -senior find the oppurtunities near to the location'
         
@@ -67,9 +68,9 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         if not search_result:
             return {"messages": [AIMessage(content="No active internships found matching your criteria.")]}
 
-        llm = ChatMistralAI(
-            model_name= "mistral-small-latest",
-            temperature= 0.2
+        llm = ChatGroq(
+            model= 'openai/gpt-oss-120b',
+            temperature= 0.1
         )
         parser = PydanticOutputParser(pydantic_object= VacanciesSchema)
 
@@ -89,11 +90,14 @@ async def internship_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         chain = prompt | llm | parser
         response = await chain.ainvoke({
             "raw_input": search_result,
-            "format_instructions": parser.get_format_instructions()
+            "format_instructions": parser.get_format_instructions(),
+            "skills_query": skills_query,
+            "location_filter": location_filter
         })
 
+        await asyncio.sleep(1.0)
         return {
-            'current_roles': response,
+            'current_roles': response.model_dump() if hasattr(response, "model_dump") else response,
             'messages': [AIMessage(content=f"Successfully extracted active internships matching skills: {', '.join(state['skills'])}")]
         }
 
@@ -114,7 +118,7 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
 
     try:
         skills_query = " OR ".join([f'"{skill}"' for skill in state['skills']])
-        tavily_query = f'({skills_query}) job vacancy hiring -internship -coop -stipend'.strip()
+        tavily_query = f'({skills_query}) (India) job vacancy hiring -internship -coop -stipend'.strip()
         
         tavily_response = await client.search(
             query=tavily_query,
@@ -129,9 +133,9 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
                 "messages": [AIMessage(content="No active full-time jobs found matching your skills and location right now.")]
             }
 
-        llm = ChatMistralAI(
-            model_name="mistral-small-latest",
-            temperature=0.2
+        llm = ChatGroq(
+                    model= 'openai/gpt-oss-120b',
+                    temperature= 0.1
         )
         parser = PydanticOutputParser(pydantic_object=VacanciesSchema)
 
@@ -140,7 +144,6 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
             Extract the active full-time job vacancies into the requested structured format.
             The user attributes are :- 
             skills :- {skills_query}
-            location :- {location_filter}
             Ensure you filter out any stray internship or short-term training listings.
             For the matching_score, analyze the similarity between the jobs and the user attributes(score out of 100).
             {format_instructions}
@@ -153,11 +156,12 @@ async def job_search_node(state: ResearchVacancyState) -> Dict[str, Any]:
         chain = prompt | llm | parser
         response = await chain.ainvoke({
             "raw_input": search_result,
-            "format_instructions": parser.get_format_instructions()
+            "format_instructions": parser.get_format_instructions(),
+            "skills_query": skills_query
         })
 
         return {
-            "current_roles": response, 
+            "current_roles": response.model_dump() if hasattr(response, "model_dump") else response, 
             "messages": [AIMessage(content=f"Found and extracted active full-time jobs for: {', '.join(state['skills'])}")]
         }
 
