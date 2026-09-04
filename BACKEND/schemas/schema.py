@@ -83,6 +83,9 @@ class VacancyItem(BaseModel):
     deadline: Optional[str] = Field(
         description= "A short bullet point if visible in the text as a deadline"
     )
+    matching_score: float = Field(
+        description= "How much does the user potrfolio and the vacancy is matching out of 100."
+    )
 
 class VacanciesSchema(BaseModel):
     vacancies: List[VacancyItem] = Field(
