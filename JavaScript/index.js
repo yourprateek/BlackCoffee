@@ -102,3 +102,11 @@ if (chatBtn && chatPopup && closeChat) {
     }
 }
 
+// ---- ROADMAP TAB SWITCHER ----
+function switchRoadmap(role, btn) {
+    document.querySelectorAll('.roadmap').forEach(r => r.classList.remove('active'));
+    document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('roadmap-' + role).classList.add('active');
+    btn.classList.add('active');
+}
+// ---- ROADMAP TAB SWITCHER END ----

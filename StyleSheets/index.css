@@ -238,6 +238,8 @@ nav button.activeBtn {
     justify-content: center;
     align-items: center;
     height: 96vh;
+    position: relative;
+    overflow: hidden;
 
     padding: 1rem;
     background:
@@ -338,47 +340,327 @@ nav button.activeBtn {
 
 /*--- HERO END ---*/
 
-/*--- STATS ---*/
-.stats-banner {
-    background-color: var(--dimmed-accent-color);
-    padding: 2rem 8rem;
-    transition: background-color 0.3s ease;
+#home_hero::before {
+    content: '';
+    position: absolute;
+    bottom: -90%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150%;
+    height: 800px;
+    border-radius: 50%;
+    background-color: var(--icon-bg-blue);
+    pointer-events: none;
+    z-index: -1;
 }
 
-.stats-container {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    max-width: 1200px;
+/*--- ROADMAP SECTION ---*/
+.roadmap-section {
+    padding: 80px 2rem;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--icon-bg-blue);
+}
+
+.roadmap-container {
+    max-width: 680px;
     margin: 0 auto;
-    flex-wrap: wrap;
-    gap: 30px;
+    position: relative;
 }
 
-.stat-item {
+.roadmap-header {
     text-align: center;
-    flex: 1 1 200px;
-}
+    margin-bottom: 2rem;
 
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    line-height: 1.1;
-}
+    h2 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+    }
 
-.stat-label {
-    font-weight: 400;
-}
-
-@media (max-width: 768px) {
-    .stats-container {
-        flex-direction: column;
-        gap: 45px;
+    p {
+        color: var(--text-muted);
+        font-size: 1rem;
     }
 }
 
-/*--- STATS END ---*/
+/* Role Tabs */
+.role-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.role-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 20px;
+    border-radius: 24px;
+    border: 1px solid var(--border-muted);
+    background-color: transparent;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.22s ease;
+}
+
+.role-tab:hover {
+    color: var(--text-color);
+    border-color: var(--text-muted);
+}
+
+.role-tab.active.tab-student {
+    background-color: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.6);
+    color: var(--text-color);
+}
+
+.role-tab.active.tab-recruiter {
+    background-color: rgba(142, 81, 255, 0.12);
+    border-color: rgba(142, 81, 255, 0.6);
+    color: var(--text-color);
+}
+
+.role-tab.active.tab-academician {
+    background-color: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: var(--text-color);
+}
+
+.soon-badge {
+    font-size: 0.62rem;
+    background: linear-gradient(to right, #00BC7D, #007B56);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+/* Roadmap panel visibility */
+.roadmap {
+    display: none;
+    animation: roadmapFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.roadmap.active {
+    display: block;
+}
+
+@keyframes roadmapFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Steps */
+.roadmap-step {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.step-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Available: gradient glow circle */
+.step-available .step-dot {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    box-shadow: 0 0 18px rgba(37, 99, 235, 0.4);
+}
+
+#roadmap-recruiter .step-available .step-dot {
+    background: linear-gradient(135deg, #8E51FF, #700BE7);
+    box-shadow: 0 0 18px rgba(142, 81, 255, 0.4);
+}
+
+/* Locked: muted circle */
+.step-locked .step-dot {
+    background-color: var(--card-bg-alt);
+    border: 1px solid var(--border-muted);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Coming soon: green-tinted */
+.step-soon .step-dot {
+    background-color: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    color: var(--accent-green);
+    font-size: 0.8rem;
+}
+
+/* Vertical trail connecting steps */
+.step-trail {
+    flex: 1;
+    width: 2px;
+    min-height: 36px;
+    margin: 5px 0;
+    border-radius: 1px;
+}
+
+.step-available .step-trail {
+    background: linear-gradient(to bottom, rgba(37, 99, 235, 0.55), rgba(37, 99, 235, 0.08));
+}
+
+#roadmap-recruiter .step-available .step-trail {
+    background: linear-gradient(to bottom, rgba(142, 81, 255, 0.55), rgba(142, 81, 255, 0.08));
+}
+
+.step-locked .step-trail {
+    background: repeating-linear-gradient(to bottom,
+            var(--border-muted) 0px,
+            var(--border-muted) 4px,
+            transparent 4px,
+            transparent 10px);
+}
+
+.step-soon .step-trail {
+    background: repeating-linear-gradient(to bottom,
+            rgba(74, 222, 128, 0.28) 0px,
+            rgba(74, 222, 128, 0.28) 4px,
+            transparent 4px,
+            transparent 10px);
+}
+
+/* Step Content */
+.step-content {
+    padding: 0 0 2.25rem 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.last-step .step-content {
+    padding-bottom: 0;
+}
+
+.step-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-available {
+    background-color: rgba(37, 99, 235, 0.12);
+    color: var(--accent-blue-light);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+#roadmap-recruiter .badge-available {
+    background-color: rgba(142, 81, 255, 0.12);
+    color: var(--accent-purple-light);
+    border: 1px solid rgba(142, 81, 255, 0.3);
+}
+
+.badge-locked {
+    background-color: var(--card-bg-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border-muted);
+}
+
+.badge-soon {
+    background-color: rgba(74, 222, 128, 0.08);
+    color: var(--accent-green);
+    border: 1px solid rgba(74, 222, 128, 0.28);
+}
+
+.step-content h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* Dim locked and soon steps */
+.step-locked .step-content h3,
+.step-locked .step-content p {
+    opacity: 0.45;
+}
+
+.step-soon .step-content h3,
+.step-soon .step-content p {
+    opacity: 0.4;
+}
+
+.step-content p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    line-height: 1.65;
+}
+
+/* CTA button inside steps */
+.step-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 7px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    background: linear-gradient(to right, #2B7FFF, #1448E7);
+    color: white;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+#roadmap-recruiter .step-cta {
+    background: linear-gradient(to right, #8E51FF, #700BE7);
+}
+
+.step-cta:hover {
+    opacity: 0.88;
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .roadmap-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .role-tab {
+        padding: 7px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+/*--- ROADMAP SECTION END ---*/
+
+
 /*--- CARDS ---*/
 
 .roles-section {
