@@ -219,6 +219,12 @@
         padding: 5px 10px;
         border-radius: 8px;
     }
+
+    #skill_verify {
+        background-color: rgba(37, 99, 235, 0.2);
+        border: 1px solid rgba(37, 99, 235, 0.5);
+        cursor: pointer;
+    }
 }
 
 .projects label {

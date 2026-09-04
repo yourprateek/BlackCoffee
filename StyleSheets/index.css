@@ -148,10 +148,13 @@ nav {
         border: 1px solid var(--card-border);
         border-radius: 12px;
         padding: 0.5rem;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
 
         &:hover {
             cursor: pointer;
+        }
+
+        &:active img {
+            animation: themeSpin 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
     }
 }
@@ -172,6 +175,26 @@ nav {
     color: white;
 }
 
+@keyframes themeSpin {
+    0% {
+        scale: 1;
+        opacity: 1;
+        rotate: 0deg;
+    }
+
+    50% {
+        scale: 0.2;
+        opacity: 0;
+        rotate: 180deg;
+    }
+
+    100% {
+        scale: 1;
+        opacity: 1;
+        rotate: 360deg;
+    }
+}
+
 /*------HEADER END------*/
 
 /*-----MAIN START-------*/
@@ -186,11 +209,18 @@ nav {
     animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Hide footer on Assistant (Chat) and Career Graph tabs */
+body:has(#chat.currentTab) footer,
+body:has(#careerGraph.currentTab) footer {
+    display: none !important;
+}
+
 @keyframes scaleIn {
     from {
         opacity: 0;
         transform: scale(0.97);
     }
+
     to {
         opacity: 1;
         transform: scale(1);

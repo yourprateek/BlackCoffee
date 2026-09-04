@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AcadBridge</title>
-    <!-- Assuming base styles are in index.css -->
+    <title>AcadBridge — Sign In</title>
+    <meta name="description"
+        content="Sign in or create your AcadBridge account to access AI-powered internship matching and skill assessments.">
     <link rel="stylesheet" href="./StyleSheets/index.css">
     <link rel="stylesheet" href="./StyleSheets/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        // Apply saved theme before first paint to avoid flash
         if (localStorage.getItem("theme") === "light") {
             document.documentElement.setAttribute("data-theme", "light");
         }
@@ -17,64 +20,365 @@
 </head>
 
 <body>
-    <header>
-        <span id="website_logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
-            <img src="./favicon/favicon.svg" alt="favicon icon" id="logo" style="height: 2em;">
+    <!-- ── HEADER ─────────────────────────────────────────── -->
+    <header class="auth-header">
+        <span id="website_logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
+            <img src="./favicon/favicon.svg" alt="AcadBridge logo" id="logo" style="height:2em;">
             <span id="Acad">Acad</span><span id="Bridge">Bridge</span>
         </span>
     </header>
 
-    <main class="login-container">
-        <div class="login-card student-active" id="loginCard">
-            
-            <div class="role-toggle">
-                <button class="toggle-btn active" id="btn-student" onclick="setRole('student')">
+    <!-- ── BACKGROUND ORBS ───────────────────────────────── -->
+    <div class="bg-orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PANEL 1 — AUTH (Login / Sign-up chooser)
+    ══════════════════════════════════════════════════════ -->
+    <main id="panel-auth" class="panel active">
+        <div class="auth-card">
+
+            <!-- Role toggle -->
+            <div class="role-toggle" id="role-toggle">
+                <button class="role-btn active" id="btn-student" onclick="setRole('student')">
                     <i class="fa-solid fa-graduation-cap"></i> Student
                 </button>
-                <button class="toggle-btn" id="btn-recruiter" onclick="setRole('recruiter')">
+                <button class="role-btn" id="btn-recruiter" onclick="setRole('recruiter')">
                     <i class="fa-solid fa-building-user"></i> Recruiter
                 </button>
             </div>
 
-            <div class="form-wrapper">
-                <!-- Student Login Form -->
-                <form id="student-form" class="active-form">
-                    <h2>Welcome back, Student</h2>
-                    <p class="subtitle">Log in to find your dream internship</p>
-                    
-                    <div class="input-group">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" placeholder="University Email" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" placeholder="Password" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-student-login">Sign In</button>
-                </form>
-
-                <!-- Recruiter Login Form -->
-                <form id="recruiter-form">
-                    <h2>Welcome back, Recruiter</h2>
-                    <p class="subtitle">Log in to hire pre-verified talent</p>
-                    
-                    <div class="input-group">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" placeholder="Work Email" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" placeholder="Password" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-recruiter-login">Sign In</button>
-                </form>
+            <!-- Tab switcher -->
+            <div class="tab-bar">
+                <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+                <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+                <span class="tab-indicator" id="tab-indicator"></span>
             </div>
-            
+
+            <!-- ── LOGIN FORM ─────────────────────────────── -->
+            <form id="login-form" class="auth-form active-tab" novalidate>
+                <div class="form-header">
+                    <h1 id="login-heading">Welcome back, Student</h1>
+                    <p class="subtitle" id="login-subtitle">Log in to find your dream internship</p>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <input type="email" id="login-email" placeholder="Email address" autocomplete="email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"
+                        required>
+                    <button type="button" class="pwd-toggle" onclick="togglePassword('login-password', this)"
+                        tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+
+                <div id="login-error" class="error-msg" role="alert" aria-live="polite"></div>
+
+                <button type="submit" class="btn-primary" id="login-submit-btn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                </button>
+
+                <p class="switch-link">No account? <a href="#" onclick="switchTab('signup'); return false;">Create
+                        one</a></p>
+            </form>
+
+            <!-- ── SIGNUP TRIGGER (Step 0 — quick start) ─── -->
+            <div id="signup-intro" class="auth-form">
+                <div class="form-header">
+                    <h1 id="signup-heading">Join AcadBridge</h1>
+                    <p class="subtitle" id="signup-subtitle">Start your verified career journey today</p>
+                </div>
+                <button type="button" class="btn-primary" onclick="startSignup()">
+                    <i class="fa-solid fa-rocket"></i> Get Started
+                </button>
+                <p class="switch-link">Already have an account? <a href="#"
+                        onclick="switchTab('login'); return false;">Sign in</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════
+         PANEL 2 — MULTI-STEP SIGN-UP WIZARD
+    ══════════════════════════════════════════════════════ -->
+    <main id="panel-signup" class="panel">
+        <div class="wizard-container">
+
+            <!-- Progress bar -->
+            <div class="progress-bar-wrap">
+                <div class="progress-steps">
+                    <div class="step-dot active" data-step="1"><span>1</span></div>
+                    <div class="step-line" id="line-1-2"></div>
+                    <div class="step-dot" data-step="2"><span>2</span></div>
+                    <div class="step-line" id="line-2-3"></div>
+                    <div class="step-dot" data-step="3"><span>3</span></div>
+                </div>
+                <div class="step-labels">
+                    <span>Personal Info</span>
+                    <span>Education</span>
+                    <span>Skills</span>
+                </div>
+            </div>
+
+            <!-- ── STEP 1 — Personal Info ─────────────────── -->
+            <div class="wizard-step active" id="step-1">
+                <h2 class="step-title">Personal Information</h2>
+                <p class="step-subtitle">Tell us about yourself</p>
+
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="s-fullname" placeholder="Full Name" autocomplete="name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        <input type="tel" id="s-phone" placeholder="Phone Number" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <input type="email" id="s-email" placeholder="Email Address" autocomplete="email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" id="s-password" placeholder="Create Password" autocomplete="new-password"
+                        required>
+                    <button type="button" class="pwd-toggle" onclick="togglePassword('s-password', this)" tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="input-group select-group">
+                        <i class="fa-solid fa-map-pin input-icon"></i>
+                        <select id="s-state" required>
+                            <option value="" disabled selected>Select State / UT</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Arunachal Pradesh</option>
+                            <option>Assam</option>
+                            <option>Bihar</option>
+                            <option>Chhattisgarh</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Haryana</option>
+                            <option>Himachal Pradesh</option>
+                            <option>Jharkhand</option>
+                            <option>Karnataka</option>
+                            <option>Kerala</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Maharashtra</option>
+                            <option>Manipur</option>
+                            <option>Meghalaya</option>
+                            <option>Mizoram</option>
+                            <option>Nagaland</option>
+                            <option>Odisha</option>
+                            <option>Punjab</option>
+                            <option>Rajasthan</option>
+                            <option>Sikkim</option>
+                            <option>Tamil Nadu</option>
+                            <option>Telangana</option>
+                            <option>Tripura</option>
+                            <option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option>
+                            <option>West Bengal</option>
+                            <option>Andaman and Nicobar Islands</option>
+                            <option>Chandigarh</option>
+                            <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option>Delhi</option>
+                            <option>Jammu and Kashmir</option>
+                            <option>Ladakh</option>
+                            <option>Lakshadweep</option>
+                            <option>Puducherry</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-city input-icon"></i>
+                        <input type="text" id="s-city" placeholder="City" required>
+                    </div>
+                </div>
+
+                <div class="input-group select-group">
+                    <i class="fa-solid fa-briefcase input-icon"></i>
+                    <select id="s-workmode" required>
+                        <option value="" disabled selected>Preferred Work Mode</option>
+                        <option value="remote">Remote</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="on-site">On-site</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+
+                <div id="step1-error" class="error-msg" role="alert"></div>
+                <div class="wizard-nav">
+                    <button type="button" class="btn-ghost" onclick="cancelSignup()"><i
+                            class="fa-solid fa-arrow-left"></i> Back</button>
+                    <button type="button" class="btn-primary" onclick="nextStep(1)">Next <i
+                            class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- ── STEP 2 — Education ─────────────────────── -->
+            <div class="wizard-step" id="step-2">
+                <h2 class="step-title">Education Details</h2>
+                <p class="step-subtitle">Your academic background</p>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-school input-icon"></i>
+                    <input type="text" id="s-institution" placeholder="Institution / University Name" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <i class="fa-solid fa-certificate input-icon"></i>
+                        <input type="text" id="s-degree" placeholder="Degree (e.g. B.Tech)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-book input-icon"></i>
+                        <input type="text" id="s-branch" placeholder="Branch / Major (optional)">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-calendar input-icon"></i>
+                    <input type="number" id="s-gradyear" placeholder="Expected Graduation Year" min="2020" max="2035"
+                        required>
+                </div>
+
+                <div id="step2-error" class="error-msg" role="alert"></div>
+                <div class="wizard-nav">
+                    <button type="button" class="btn-ghost" onclick="prevStep(2)"><i class="fa-solid fa-arrow-left"></i>
+                        Back</button>
+                    <button type="button" class="btn-primary" onclick="nextStep(2)">Next <i
+                            class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- ── STEP 3 — Skills ────────────────────────── -->
+            <div class="wizard-step" id="step-3">
+                <h2 class="step-title">Your Skills</h2>
+                <p class="step-subtitle">Add skills you know — these will be used for your first assessment. <br>
+                    <strong>Please revise the skills before proceeding further</strong></p>
+
+                <div class="tag-input-wrap" id="tag-input-wrap">
+                    <div class="tags-display" id="tags-display"></div>
+                    <input type="text" id="skill-input" placeholder="Type a skill and press Enter…" autocomplete="off">
+                </div>
+                <p class="tag-hint"><i class="fa-solid fa-circle-info"></i> Press <kbd>Enter</kbd> or <kbd>,</kbd> to
+                    add. Minimum 2 skills required.</p>
+
+                <div id="step3-error" class="error-msg" role="alert"></div>
+
+                <div class="wizard-nav">
+                    <button type="button" class="btn-ghost" onclick="prevStep(3)"><i class="fa-solid fa-arrow-left"></i>
+                        Back</button>
+                    <button type="button" class="btn-primary" id="create-account-btn" onclick="submitSignup()">
+                        <span class="btn-text"><i class="fa-solid fa-user-plus"></i> Create Account</span>
+                        <span class="btn-loader hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════
+         PANEL 3 — MANDATORY ASSESSMENT
+    ══════════════════════════════════════════════════════ -->
+    <main id="panel-assessment" class="panel">
+        <div class="assessment-container">
+            <div class="assessment-header">
+                <div class="assessment-badge"><i class="fa-solid fa-brain"></i> Skill Assessment</div>
+                <h2 id="assessment-title">Your First Assessment</h2>
+                <p id="assessment-subtitle">Answer all questions to verify your skills. Score ≥75% to get verified.</p>
+                <div class="assessment-meta">
+                    <span><i class="fa-solid fa-list-check"></i> <span id="q-count">12</span> Questions</span>
+                    <span><i class="fa-solid fa-shield-halved"></i> Skill Verification</span>
+                    <span><i class="fa-solid fa-star"></i> 75% to pass</span>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="assessment-loading" class="loading-state">
+                <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                <p>Generating your personalised assessment…</p>
+                <p class="loading-sub">Our AI is crafting questions based on your skills</p>
+            </div>
+
+            <!-- Questions -->
+            <div id="questions-container" class="questions-container hidden"></div>
+
+            <!-- Submit -->
+            <div id="assessment-footer" class="assessment-footer hidden">
+                <div id="assess-error" class="error-msg" role="alert"></div>
+                <button type="button" class="btn-primary btn-wide" id="submit-assessment-btn"
+                    onclick="submitAssessment()">
+                    <span class="btn-text"><i class="fa-solid fa-paper-plane"></i> Submit Assessment</span>
+                    <span class="btn-loader hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════
+         PANEL 4 — RESULTS
+    ══════════════════════════════════════════════════════ -->
+    <main id="panel-results" class="panel">
+        <div class="results-container">
+            <!-- Score ring -->
+            <div class="score-ring-wrap">
+                <svg class="score-ring" viewBox="0 0 120 120">
+                    <circle class="ring-bg" cx="60" cy="60" r="52" />
+                    <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" stroke-dasharray="326.73"
+                        stroke-dashoffset="326.73" />
+                </svg>
+                <div class="score-text">
+                    <span class="score-num" id="score-num">0</span>
+                    <span class="score-label">/ 100</span>
+                </div>
+            </div>
+
+            <div id="pass-badge" class="result-badge pass hidden">
+                <i class="fa-solid fa-circle-check"></i> Skills Verified!
+            </div>
+            <div id="fail-badge" class="result-badge fail hidden">
+                <i class="fa-solid fa-circle-xmark"></i> Not Quite Yet
+            </div>
+
+            <p id="verification-status" class="verification-text"></p>
+
+            <!-- Summary -->
+            <div class="result-section">
+                <h3><i class="fa-solid fa-file-lines"></i> Summary</h3>
+                <p id="result-summary" class="result-body"></p>
+            </div>
+
+            <!-- Strong / Weak areas -->
+            <div class="result-areas">
+                <div class="result-section">
+                    <h3><i class="fa-solid fa-bolt" style="color:var(--accent-green)"></i> Strong Areas</h3>
+                    <ul id="strong-list" class="area-list strong"></ul>
+                </div>
+                <div class="result-section">
+                    <h3><i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b"></i> Improve</h3>
+                    <ul id="improve-list" class="area-list improve"></ul>
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary btn-wide" onclick="goToDashboard()">
+                <i class="fa-solid fa-gauge-high"></i> Enter Dashboard
+            </button>
         </div>
     </main>
 
     <script src="./JavaScript/login.js"></script>
 </body>
+
 </html>
