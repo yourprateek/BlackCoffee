@@ -446,7 +446,7 @@
 
 .chat-input-wrapper {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 10px;
     background-color: var(--card-bg-alt);
     border: 1px solid var(--card-border);
