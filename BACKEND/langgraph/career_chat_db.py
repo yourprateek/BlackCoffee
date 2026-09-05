@@ -3,7 +3,7 @@ from database.configurations import user_chat_collections
 from schemas.user_schema import User
 from database.user_db import get_user_data
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
-from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, START, END
 from typing import List, TypedDict, Optional
 
@@ -76,17 +76,14 @@ async def call_career_llm_node(state: ChatState):
     msgs_for_model = []
     
     for msg in state.get("messages_history", []):
-        # 1. If it's already a LangChain message object, pass it directly
         if isinstance(msg, BaseMessage):
             msgs_for_model.append(msg)
             continue
 
-        # 2. If it's a dict, safely extract using .get()
         if isinstance(msg, dict):
             role = msg.get("role")
             content = msg.get("content", "")
             
-            # If the content itself was wrapped as a message object
             if isinstance(content, BaseMessage):
                 content = content.content
             else:
@@ -99,10 +96,8 @@ async def call_career_llm_node(state: ChatState):
             elif role == "ai":
                 msgs_for_model.append(AIMessage(content=content))
 
-    model = ChatGroq(
-        model= 'openai/gpt-oss-120b',
-        temperature= 0.55,
-        max_tokens= 800
+    model = ChatGoogleGenerativeAI(
+        model= 'gemini-3.5-flash-lite'
     )
     response = await model.ainvoke(msgs_for_model)
     

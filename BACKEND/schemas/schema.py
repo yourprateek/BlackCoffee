@@ -128,7 +128,6 @@ class UserChatThreads(BaseModel):
     threads: List[ThreadDetail]
 
 class CareerChatPayload(BaseModel):
-    email: EmailStr
     message: str
     thread_title: Optional[str] = None
 

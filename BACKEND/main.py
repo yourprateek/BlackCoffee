@@ -321,17 +321,17 @@ async def submit_assessment(payload: SubmitAssessmentRequest, user: UserDependen
     }
     
 @app.post('/career_talk')
-async def chatbot_guide(payload: CareerChatPayload):
+async def chatbot_guide(payload: CareerChatPayload, user: UserDependency):
     try:
         result = await career_chat_graph.ainvoke({
-            "email": payload.email,
+            "email": user['email'],
             "message": payload.message,
             "thread_title": payload.thread_title,
             "messages_history": [],
             "final_reply": ""
         })
         return {
-            "reply": result["final_reply"],
+            "reply": result["final_reply"][0]['text'],
             "thread_title": result["thread_title"]
         }
     except Exception as err:
