@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcadBridge — Skill Assessment</title>
+    <link rel="stylesheet" href="./StyleSheets/index.css">
+    <link rel="stylesheet" href="./StyleSheets/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem("theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/6c7a383a19.js" crossorigin="anonymous"></script>
+    <style>
+        .panel { display: none; }
+        .panel.active { display: block; }
+    </style>
+</head>
+
+<body>
+    <header class="auth-header">
+        <span id="website_logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
+            <img src="./favicon/favicon.svg" alt="AcadBridge logo" id="logo" style="height:2em;">
+            <span id="Acad">Acad</span><span id="Bridge">Bridge</span>
+        </span>
+    </header>
+
+    <div class="bg-orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- SKILL ENTRY PANEL (Used if no skills are pending) -->
+    <main id="panel-skill-entry" class="panel active">
+        <div class="auth-card" style="text-align: center;">
+            <h2 style="margin-bottom: 1rem;">Verify a New Skill</h2>
+            <p class="subtitle" style="margin-bottom: 2rem;">Enter a skill you want to get verified for.</p>
+            
+            <div class="input-group">
+                <i class="fa-solid fa-star input-icon"></i>
+                <input type="text" id="new-skill-input" placeholder="e.g. React, Python, Data Analysis" required>
+            </div>
+            
+            <div id="skill-entry-error" class="error-msg" role="alert"></div>
+            
+            <button type="button" class="btn-primary" style="margin-top: 1.5rem;" onclick="startStandaloneAssessment()">
+                <i class="fa-solid fa-play"></i> Start Assessment
+            </button>
+            <button type="button" class="btn-ghost" style="margin-top: 0.5rem;" onclick="window.location.href='index.html'">
+                Cancel
+            </button>
+        </div>
+    </main>
+
+    <!-- ASSESSMENT PANEL -->
+    <main id="panel-assessment" class="panel">
+        <div class="assessment-container">
+            <div class="assessment-header">
+                <div class="assessment-badge"><i class="fa-solid fa-brain"></i> Skill Assessment</div>
+                <h2 id="assessment-title">Your Assessment</h2>
+                <p id="assessment-subtitle">Answer all questions to verify your skills. Score ≥75% to get verified.</p>
+                <div class="assessment-meta">
+                    <span><i class="fa-solid fa-list-check"></i> <span id="q-count">0</span> Questions</span>
+                    <span><i class="fa-solid fa-shield-halved"></i> Skill Verification</span>
+                    <span><i class="fa-solid fa-star"></i> 75% to pass</span>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="assessment-loading" class="loading-state">
+                <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                <p>Generating your personalised assessment…</p>
+                <p class="loading-sub">Our AI is crafting questions based on your skills</p>
+            </div>
+
+            <!-- Questions -->
+            <div id="questions-container" class="questions-container hidden"></div>
+
+            <!-- Submit -->
+            <div id="assessment-footer" class="assessment-footer hidden">
+                <div id="assess-error" class="error-msg" role="alert"></div>
+                <button type="button" class="btn-primary btn-wide" id="submit-assessment-btn"
+                    onclick="submitAssessment()">
+                    <span class="btn-text"><i class="fa-solid fa-paper-plane"></i> Submit Assessment</span>
+                    <span class="btn-loader hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- RESULTS PANEL -->
+    <main id="panel-results" class="panel">
+        <div class="results-container">
+            <div class="score-ring-wrap">
+                <svg class="score-ring" viewBox="0 0 120 120">
+                    <circle class="ring-bg" cx="60" cy="60" r="52" />
+                    <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" stroke-dasharray="326.73"
+                        stroke-dashoffset="326.73" />
+                </svg>
+                <div class="score-text">
+                    <span class="score-num" id="score-num">0</span>
+                    <span class="score-label">/ 100</span>
+                </div>
+            </div>
+
+            <div id="pass-badge" class="result-badge pass hidden">
+                <i class="fa-solid fa-circle-check"></i> Skills Verified!
+            </div>
+            <div id="fail-badge" class="result-badge fail hidden">
+                <i class="fa-solid fa-circle-xmark"></i> Not Quite Yet
+            </div>
+
+            <p id="verification-status" class="verification-text"></p>
+
+            <div class="result-section">
+                <h3><i class="fa-solid fa-file-lines"></i> Summary</h3>
+                <p id="result-summary" class="result-body"></p>
+            </div>
+
+            <div class="result-areas">
+                <div class="result-section">
+                    <h3><i class="fa-solid fa-bolt" style="color:var(--accent-green)"></i> Strong Areas</h3>
+                    <ul id="strong-list" class="area-list strong"></ul>
+                </div>
+                <div class="result-section">
+                    <h3><i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b"></i> Improve</h3>
+                    <ul id="improve-list" class="area-list improve"></ul>
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary btn-wide" onclick="window.location.href='index.html'">
+                <i class="fa-solid fa-arrow-left"></i> Return to Profile
+            </button>
+        </div>
+    </main>
+
+    <script src="./JavaScript/assessment.js"></script>
+</body>
+</html>

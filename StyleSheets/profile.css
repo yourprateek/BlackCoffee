@@ -71,15 +71,14 @@
     border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 1.75rem;
-    flex: 1 1 0;        /* grow & shrink equally, no fixed base */
-    min-width: 0;       /* prevent overflow in flex context */
+    min-width: 0;       /* prevent overflow in grid context */
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .portfolio-grid {
-    display: flex;
-    align-items: stretch;   /* cards match each other's height */
-    gap: 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* 2 equal columns on desktop */
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto 2rem auto;
     width: calc(100% - 6rem);
@@ -152,6 +151,55 @@
 
 .project:last-child {
     margin-bottom: 0;
+}
+
+/* Shared row layout for card_content (exp, test_history, courses, certificates) */
+.card_content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.card_content:last-child {
+    margin-bottom: 0;
+}
+
+.card_content > span:first-child {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background-color: var(--card-bg-alt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+}
+
+.card_content strong {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.card_content small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Shared label for all portfolio cards */
+.card > label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 14px;
 }
 
 /*--- CHAT WIDGET ---*/
@@ -274,8 +322,9 @@
     }
 
     .portfolio-grid {
-        flex-direction: column;
-        gap: 1.5rem;
+        grid-template-columns: 1fr;  /* single column on mobile */
+        gap: 1rem;
+        width: calc(100% - 2rem);
     }
 
     .chat-popup {

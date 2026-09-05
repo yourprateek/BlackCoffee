@@ -40,6 +40,16 @@ const homeBtn = document.querySelector("nav button");
 const footerEl = document.querySelector("footer");
 
 function changeTab(newTab, clickedButton) {
+    const userEmail = localStorage.getItem("userEmail");
+    
+    // Auth guard for protected tabs
+    if (newTab === profileTab || newTab === interNJobTab || newTab === chatTab) {
+        if (!userEmail) {
+            window.location.href = "login.html";
+            return;
+        }
+    }
+
     currentTab.classList.remove("currentTab");
     currentTab = newTab;
     currentTab.classList.add("currentTab");
@@ -110,3 +120,72 @@ function switchRoadmap(role, btn) {
     btn.classList.add('active');
 }
 // ---- ROADMAP TAB SWITCHER END ----
+
+// ---- AUTH & DROPDOWN LOGIC ----
+document.addEventListener("DOMContentLoaded", () => {
+    const userEmail = localStorage.getItem("userEmail");
+    const loginBtn = document.getElementById("login");
+    const profileDropdown = document.getElementById("profile-dropdown");
+    const userEmailDisplay = document.getElementById("user-email-display");
+    const profileBtn = document.getElementById("profile-btn");
+    const profileMenu = document.getElementById("profile-menu");
+    
+    // Auth UI state
+    if (userEmail) {
+        if (loginBtn) loginBtn.style.display = "none";
+        if (profileDropdown) profileDropdown.style.display = "block";
+        if (userEmailDisplay) userEmailDisplay.textContent = userEmail;
+    } else {
+        if (loginBtn) loginBtn.style.display = "inline-flex";
+        if (profileDropdown) profileDropdown.style.display = "none";
+    }
+
+    // Toggle dropdown
+    if (profileBtn && profileMenu) {
+        profileBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            profileMenu.classList.toggle("show");
+        });
+
+        // Close when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!profileDropdown.contains(e.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
+    }
+
+    // Dropdown Actions
+    const menuProfileBtn = document.getElementById("menu-profile-btn");
+    const menuNotifBtn = document.getElementById("menu-notifications-btn");
+    const signOutBtn = document.getElementById("sign-out-btn");
+    
+    // The "Profile" button inside the nav header usually has index 1 (0=Home, 1=Profile)
+    const profileNavBtn = document.querySelectorAll("nav button")[1];
+
+    if (menuProfileBtn) {
+        menuProfileBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            changeTab(profileTab, profileNavBtn);
+            profileMenu.classList.remove("show");
+        });
+    }
+
+    if (menuNotifBtn) {
+        menuNotifBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            // Notifications logic goes here later
+            profileMenu.classList.remove("show");
+        });
+    }
+
+    if (signOutBtn) {
+        signOutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            localStorage.removeItem("userEmail");
+            localStorage.removeItem("userName");
+            window.location.href = "login.html";
+        });
+    }
+});
+// ---- AUTH & DROPDOWN LOGIC END ----
