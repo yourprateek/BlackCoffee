@@ -30,6 +30,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title= "BlackCoffee", lifespan= lifespan)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "alive"}
+
 @app.get('/get_user_info')
 async def get_user(user_email: EmailStr) -> Dict[str, Any]:
 
