@@ -71,22 +71,38 @@ async def chat_history_node(state: ChatState):
         "messages_history": messages_to_process
     }
 
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
+
 async def call_career_llm_node(state: ChatState):
     msgs_for_model = []
     
-    for msg in state["messages_history"]:
-        role = msg.get("role")
-        content = msg.get("content", "")
-        
-        if role == "system":
-            msgs_for_model.append(SystemMessage(content=content))
-        elif role == "human":
-            msgs_for_model.append(HumanMessage(content=content))
-        elif role == "ai":
-            msgs_for_model.append(AIMessage(content=content))
+    for msg in state.get("messages_history", []):
+        # 1. If it's already a LangChain message object, pass it directly
+        if isinstance(msg, BaseMessage):
+            msgs_for_model.append(msg)
+            continue
+
+        # 2. If it's a dict, safely extract using .get()
+        if isinstance(msg, dict):
+            role = msg.get("role")
+            content = msg.get("content", "")
+            
+            # If the content itself was wrapped as a message object
+            if isinstance(content, BaseMessage):
+                content = content.content
+            else:
+                content = str(content)
+
+            if role == "system":
+                msgs_for_model.append(SystemMessage(content=content))
+            elif role == "human":
+                msgs_for_model.append(HumanMessage(content=content))
+            elif role == "ai":
+                msgs_for_model.append(AIMessage(content=content))
 
     model = ChatGoogleGenerativeAI(
-        model= 'gemini-2.5-flash'
+        model='gemini-2.0-flash',
+        temperature=0.45
     )
     response = await model.ainvoke(msgs_for_model)
     
