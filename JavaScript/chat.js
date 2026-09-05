@@ -1,6 +1,6 @@
 // ---- AI CAREER CHAT ----
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://blackcoffee-backend-rgup.onrender.com';
 
 // Placeholder — swap this for localStorage.getItem('userEmail') once login is complete
 const PLACEHOLDER_EMAIL = 'guest@acadbridge.dev';
