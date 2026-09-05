@@ -3,7 +3,7 @@ from database.configurations import user_chat_collections
 from schemas.user_schema import User
 from database.user_db import get_user_data
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import List, TypedDict, Optional
 
@@ -99,9 +99,9 @@ async def call_career_llm_node(state: ChatState):
             elif role == "ai":
                 msgs_for_model.append(AIMessage(content=content))
 
-    model = ChatGoogleGenerativeAI(
-        model='gemini-2.5-flash',
-        temperature=0.4
+    model = ChatGroq(
+        model= 'openai/gpt-oss-120b',
+        temperature= 0.55
     )
     response = await model.ainvoke(msgs_for_model)
     

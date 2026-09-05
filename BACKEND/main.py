@@ -58,7 +58,7 @@ async def get_all_threads(user: UserDependency) -> List[str] | str:
             {'threads': 1}
         )
         if all_chat_threads:
-            all_thread_titles = [thread['thread_title'] for thread in all_chat_threads]
+            all_thread_titles = [thread['thread_title'] for thread in all_chat_threads['threads']]
             return all_thread_titles
         return "No such threads found"
     except Exception as err:
