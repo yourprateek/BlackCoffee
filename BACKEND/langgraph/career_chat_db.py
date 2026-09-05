@@ -101,7 +101,8 @@ async def call_career_llm_node(state: ChatState):
 
     model = ChatGroq(
         model= 'openai/gpt-oss-120b',
-        temperature= 0.55
+        temperature= 0.55,
+        max_tokens= 800
     )
     response = await model.ainvoke(msgs_for_model)
     
