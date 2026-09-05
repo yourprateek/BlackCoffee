@@ -255,8 +255,12 @@ async def start_assessment(topics: List[str], user: UserDependency):
             detail=f"Failed to initialize assessment framework: {str(err)}"
         )
     
+from schemas.schema import SubmitAssessmentRequest
+
 @app.post('/assessment_score')
-async def submit_assessment(assessment_id: str, user_answers: Dict[str, str], user: UserDependency):
+async def submit_assessment(payload: SubmitAssessmentRequest, user: UserDependency):
+    assessment_id = payload.assessment_id
+    user_answers = payload.user_answers
 
     config = {"configurable": {"thread_id": str(assessment_id)}}
     current_state = await assessment_builder.aget_state(config)
@@ -267,47 +271,50 @@ async def submit_assessment(assessment_id: str, user_answers: Dict[str, str], us
             detail="Assessment session not found. It may have expired or the ID is invalid."
         )
         
-    await assessment_builder.aupdate_state(config, {"user_answers": user_answers}, as_node="assessment_generator")
+    await assessment_builder.aupdate_state(
+        config, 
+        {"user_answers": user_answers}, 
+        as_node="assessment_generator"
+    )
     
     await assessment_builder.ainvoke(None, config=config)
 
     final_state = await assessment_builder.aget_state(config)
     final_report = final_state.values.get("analysis")
-    score = final_report.score
+    score = getattr(final_report, 'score', 0)
 
-    flattened_questions = [
-        q.question_text if hasattr(q, 'question_text') else q.get('question_text', str(q)) 
-        for q in final_state.values.get('questions', [])
-    ]
+    flattened_questions = []
+    for q in final_state.values.get('questions', []):
+        if hasattr(q, 'question_text'):
+            flattened_questions.append(q.question_text)
+        elif isinstance(q, dict):
+            flattened_questions.append(q.get('question_text', str(q)))
+        else:
+            flattened_questions.append(str(q))
+
     sequential_answers = list(final_state.values.get('user_answers', {}).values())
 
     assessment_data = {
         'assessment_id': str(assessment_id),
         'assessment_topics': ', '.join(final_state.values.get('topics', [])),
-        
         'assessment_questions': flattened_questions,
         'assessment_answers': sequential_answers,
-        
         'assessment_score': int(score),
-        'assessment_overall_summary': final_report.test_summary if hasattr(final_report, 'test_summary') else str(final_report)
+        'assessment_overall_summary': getattr(final_report, 'test_summary', str(final_report))
     }
 
     resp_1 = await update_assessment(user['email'], assessment_data)
 
     if score < 75:
-        skill_verification_status = "Sorry! You didn't pass the minimum percentage to verify your skills. "\
-            "Dont worry! Revise your concepts and come again to give the assessment."
+        skill_verification_status = (
+            "Sorry! You didn't pass the minimum percentage to verify your skills. "
+            "Don't worry! Revise your concepts and come again to give the assessment."
+        )
     else:
-        skill_verification_status = "Congratulations! You passed the assessment test. "
-        verified_skills = final_state.values.get('topics')
+        skill_verification_status = "Congratulations! You passed the assessment test."
+        verified_skills = final_state.values.get('topics', [])
         await update_verified_skills(user['email'], verified_skills)
 
-    if resp_1['status_code'] == 500:
-        return {
-        'test_report': final_report,
-        'skill_verification_status': skill_verification_status,
-        'storing_issue': HTTPException(status_code= 500, detail= str(resp_1['message']))
-    }
     return {
         'test_report': final_report,
         'skill_verification_status': skill_verification_status

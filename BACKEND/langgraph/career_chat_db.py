@@ -76,31 +76,36 @@ async def call_career_llm_node(state: ChatState):
     msgs_for_model = []
     
     for msg in state.get("messages_history", []):
+        # 1. If it's already a LangChain message object, pass it directly
         if isinstance(msg, BaseMessage):
             msgs_for_model.append(msg)
             continue
 
-        role = msg.get("role")
-        content = msg.get("content", "")
-        
-        if role == "system":
-            msgs_for_model.append(SystemMessage(content=content))
-        elif role == "human":
-            msgs_for_model.append(HumanMessage(content=content))
-        elif role == "ai":
-            msgs_for_model.append(AIMessage(content=content))
+        # 2. If it's a dict, safely extract using .get()
+        if isinstance(msg, dict):
+            role = msg.get("role")
+            content = msg.get("content", "")
+            
+            # If the content itself was wrapped as a message object
+            if isinstance(content, BaseMessage):
+                content = content.content
+            else:
+                content = str(content)
 
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-    
+            if role == "system":
+                msgs_for_model.append(SystemMessage(content=content))
+            elif role == "human":
+                msgs_for_model.append(HumanMessage(content=content))
+            elif role == "ai":
+                msgs_for_model.append(AIMessage(content=content))
+
     model = ChatGoogleGenerativeAI(
-        model='gemini-2.5-flash', 
-        google_api_key=api_key,
+        model='gemini-2.5-flash',
         temperature=0.4
     )
-    
     response = await model.ainvoke(msgs_for_model)
-    return {"final_reply": response.content}
     
+    return {"final_reply": response.content}
 async def save_to_mongodb_node(state: ChatState):
     email = state["email"].lower().strip()
     thread_title = state["thread_title"]

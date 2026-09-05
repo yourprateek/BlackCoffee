@@ -7,7 +7,7 @@
      POST /assessment_score             body: {assessment_id, user_answers}, query: user_email
 ═══════════════════════════════════════════════════════════ */
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://blackcoffee-backend-rgup.onrender.com';
 
 /* ── State ─────────────────────────────────────────────── */
 const state = {
@@ -41,10 +41,10 @@ function clearError(elId) {
 function setLoading(btnId, loading) {
     const btn = $(btnId);
     if (!btn) return;
-    const text   = btn.querySelector('.btn-text');
+    const text = btn.querySelector('.btn-text');
     const loader = btn.querySelector('.btn-loader');
     btn.disabled = loading;
-    if (text)   text.classList.toggle('hidden', loading);
+    if (text) text.classList.toggle('hidden', loading);
     if (loader) loader.classList.toggle('hidden', !loading);
 }
 
@@ -64,15 +64,15 @@ function setRole(role) {
 
     /* Update headings */
     if (role === 'student') {
-        $('login-heading').textContent    = 'Welcome back, Student';
-        $('login-subtitle').textContent   = 'Log in to find your dream internship';
-        $('signup-heading').textContent   = 'Join AcadBridge';
-        $('signup-subtitle').textContent  = 'Start your verified career journey today';
+        $('login-heading').textContent = 'Welcome back, Student';
+        $('login-subtitle').textContent = 'Log in to find your dream internship';
+        $('signup-heading').textContent = 'Join AcadBridge';
+        $('signup-subtitle').textContent = 'Start your verified career journey today';
     } else {
-        $('login-heading').textContent    = 'Welcome back, Recruiter';
-        $('login-subtitle').textContent   = 'Log in to hire pre-verified talent';
-        $('signup-heading').textContent   = 'Post Opportunities';
-        $('signup-subtitle').textContent  = 'Connect with verified student talent';
+        $('login-heading').textContent = 'Welcome back, Recruiter';
+        $('login-subtitle').textContent = 'Log in to hire pre-verified talent';
+        $('signup-heading').textContent = 'Post Opportunities';
+        $('signup-subtitle').textContent = 'Connect with verified student talent';
     }
 }
 
@@ -91,7 +91,7 @@ function switchTab(tab) {
 /* Password eye toggle */
 function togglePassword(inputId, btn) {
     const input = $(inputId);
-    const icon  = btn.querySelector('i');
+    const icon = btn.querySelector('i');
     if (input.type === 'password') {
         input.type = 'text';
         icon.className = 'fa-solid fa-eye-slash';
@@ -104,11 +104,11 @@ function togglePassword(inputId, btn) {
 /* ══════════════════════════════════════════════════════════
    PANEL 1 — LOGIN
 ══════════════════════════════════════════════════════════ */
-$('login-form').addEventListener('submit', async function(e) {
+$('login-form').addEventListener('submit', async function (e) {
     e.preventDefault();
     clearError('login-error');
 
-    const email    = $('login-email').value.trim();
+    const email = $('login-email').value.trim();
     const password = $('login-password').value;
 
     if (!email) { showError('login-error', 'Please enter your email address.'); return; }
@@ -172,10 +172,10 @@ function goToStep(n, direction = 'forward') {
 
 function updateProgressDots(current) {
     for (let i = 1; i <= 3; i++) {
-        const dot  = document.querySelector(`.step-dot[data-step="${i}"]`);
+        const dot = document.querySelector(`.step-dot[data-step="${i}"]`);
         if (!dot) continue;
         dot.classList.toggle('active', i === current);
-        dot.classList.toggle('done',   i < current);
+        dot.classList.toggle('done', i < current);
     }
     /* Lines */
     const l12 = $('line-1-2');
@@ -198,15 +198,15 @@ function validateStep(step) {
     clearError(`step${step}-error`);
 
     if (step === 1) {
-        const name     = $('s-fullname').value.trim();
-        const phone    = $('s-phone').value.trim();
-        const email    = $('s-email').value.trim();
+        const name = $('s-fullname').value.trim();
+        const phone = $('s-phone').value.trim();
+        const email = $('s-email').value.trim();
         const password = $('s-password').value;
-        const state_   = $('s-state').value;
-        const city     = $('s-city').value.trim();
+        const state_ = $('s-state').value;
+        const city = $('s-city').value.trim();
         const workmode = $('s-workmode').value;
 
-        if (!name)     { showError('step1-error', 'Full name is required.'); return false; }
+        if (!name) { showError('step1-error', 'Full name is required.'); return false; }
         if (!phone || !/^\+?[\d\s\-]{8,15}$/.test(phone)) {
             showError('step1-error', 'Enter a valid phone number.'); return false;
         }
@@ -216,17 +216,17 @@ function validateStep(step) {
         if (password.length < 6) {
             showError('step1-error', 'Password must be at least 6 characters.'); return false;
         }
-        if (!state_)   { showError('step1-error', 'Please select your state.'); return false; }
-        if (!city)     { showError('step1-error', 'City is required.'); return false; }
+        if (!state_) { showError('step1-error', 'Please select your state.'); return false; }
+        if (!city) { showError('step1-error', 'City is required.'); return false; }
         if (!workmode) { showError('step1-error', 'Please select a work mode preference.'); return false; }
     }
 
     if (step === 2) {
-        const inst    = $('s-institution').value.trim();
-        const degree  = $('s-degree').value.trim();
-        const year    = parseInt($('s-gradyear').value, 10);
+        const inst = $('s-institution').value.trim();
+        const degree = $('s-degree').value.trim();
+        const year = parseInt($('s-gradyear').value, 10);
 
-        if (!inst)   { showError('step2-error', 'Institution name is required.'); return false; }
+        if (!inst) { showError('step2-error', 'Institution name is required.'); return false; }
         if (!degree) { showError('step2-error', 'Degree is required.'); return false; }
         if (!year || year < 2020 || year > 2035) {
             showError('step2-error', 'Enter a valid graduation year (2020–2035).'); return false;
@@ -244,9 +244,9 @@ function validateStep(step) {
 
 /* ── Tag input ────────────────────────────────────────── */
 (function initTagInput() {
-    const input   = $('skill-input');
+    const input = $('skill-input');
     const display = $('tags-display');
-    const wrap    = $('tag-input-wrap');
+    const wrap = $('tag-input-wrap');
 
     if (!input || !display) return;
 
@@ -292,7 +292,7 @@ function validateStep(step) {
 })();
 
 function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 /* ── Submit sign-up ───────────────────────────────────── */
@@ -304,26 +304,26 @@ async function submitSignup() {
     /* Build User payload matching the backend schema */
     const payload = {
         full_name: $('s-fullname').value.trim(),
-        email:     $('s-email').value.trim().toLowerCase(),
+        email: $('s-email').value.trim().toLowerCase(),
         phone_num: $('s-phone').value.trim(),
         location: {
-            state:                $('s-state').value,
-            city:                 $('s-city').value.trim(),
-            country:              'India',
+            state: $('s-state').value,
+            city: $('s-city').value.trim(),
+            country: 'India',
             preferred_work_modes: $('s-workmode').value
         },
         education: {
-            institution:     $('s-institution').value.trim(),
-            degree:          $('s-degree').value.trim(),
-            branch:          $('s-branch').value.trim() || null,
+            institution: $('s-institution').value.trim(),
+            degree: $('s-degree').value.trim(),
+            branch: $('s-branch').value.trim() || null,
             graduation_year: parseInt($('s-gradyear').value, 10)
         },
         skills: {
-            user_skills:     state.skills,
+            user_skills: state.skills,
             verified_skills: []
         },
         experience: {
-            internships_done:  [],
+            internships_done: [],
             courses_completed: []
         },
         assessment: {
@@ -332,16 +332,16 @@ async function submitSignup() {
         },
         targetted_roles: [],
         user_metadata: {
-            acc_created_at:      new Date().toISOString(),
-            last_checked_in_at:  new Date().toISOString()
+            acc_created_at: new Date().toISOString(),
+            last_checked_in_at: new Date().toISOString()
         }
     };
 
     try {
         const res = await fetch(`${API_BASE}/user_account_creation`, {
-            method:  'POST',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(payload)
+            body: JSON.stringify(payload)
         });
 
         const data = await res.json().catch(() => ({}));
@@ -349,12 +349,14 @@ async function submitSignup() {
         if (res.ok || res.status === 201) {
             state.userEmail = payload.email;
             localStorage.setItem('userEmail', payload.email);
-            localStorage.setItem('userName',  payload.full_name);
-            /* Move to assessment panel */
-            showPanel('assessment');
-            await loadAssessment();
+            localStorage.setItem('userName', payload.full_name);
+            
+            // Redirect to standalone assessment page
+            localStorage.setItem("pendingSkillForAssessment", state.skills[0] || state.skills.join(", "));
+            window.location.href = "assessment.html";
         } else {
-            showError('step3-error', data.detail || 'Account creation failed. Please try again.');
+            showError('step3-error', data.error || data.detail || 'Signup failed.');
+            setLoading('create-account-btn', false);
         }
     } catch (err) {
         showError('step3-error', 'Cannot connect to server. Make sure the backend is running.');
@@ -378,9 +380,9 @@ async function loadAssessment() {
         const res = await fetch(
             `${API_BASE}/initial_assessment?user_email=${encodeURIComponent(state.userEmail)}`,
             {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify(topicsPayload)
+                body: JSON.stringify(topicsPayload)
             }
         );
 
@@ -391,7 +393,7 @@ async function loadAssessment() {
 
         const data = await res.json();
         state.assessmentId = data.assessment_id;
-        state.questions    = data.questions || [];
+        state.questions = data.questions || [];
 
         $('q-count').textContent = state.questions.length;
         renderQuestions(state.questions);
@@ -419,8 +421,8 @@ function renderQuestions(questions) {
         card.className = 'question-card';
         card.id = `q-card-${idx}`;
 
-        const isMCQ  = q.question_type === 'MCQ';
-        const diff   = (q.difficulty || '').toLowerCase();
+        const isMCQ = q.question_type === 'MCQ';
+        const diff = (q.difficulty || '').toLowerCase();
         const diffClass = diff === 'basic' ? 'basic' : diff === 'intermediate' ? 'inter' : 'adv';
 
         let answerHtml = '';
@@ -475,7 +477,7 @@ async function submitAssessment() {
 
     /* Collect answers { "0": "answer text", "1": "A. Option text" … } */
     const userAnswers = {};
-    let   missing     = 0;
+    let missing = 0;
 
     state.questions.forEach((q, idx) => {
         const isMCQ = q.question_type === 'MCQ';
@@ -506,20 +508,21 @@ async function submitAssessment() {
 
     try {
         const res = await fetch(
-            `${API_BASE}/assessment_score?user_email=${encodeURIComponent(state.userEmail)}`,
+            `${API_BASE}/assessment_score?user_email=${encodeURIComponent(state.userEmail)}&assessment_id=${encodeURIComponent(state.assessmentId)}`,
             {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({
+                body: JSON.stringify({
                     assessment_id: state.assessmentId,
-                    user_answers:  userAnswers
+                    user_answers: userAnswers
                 })
             }
         );
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.detail || 'Failed to submit assessment.');
+            const errMsg = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail);
+            throw new Error(errMsg || 'Failed to submit assessment.');
         }
 
         const result = await res.json();
@@ -538,13 +541,13 @@ function showResults(result) {
     showPanel('results');
 
     const report = result.test_report || {};
-    const score  = report.score ?? 0;
+    const score = report.score ?? 0;
     const passed = score >= 75;
 
     /* Score ring animation */
     const circumference = 2 * Math.PI * 52; // 326.73
-    const offset        = circumference - (score / 100) * circumference;
-    const ring          = $('ring-fill');
+    const offset = circumference - (score / 100) * circumference;
+    const ring = $('ring-fill');
 
     ring.style.strokeDashoffset = circumference; // start at 0
     ring.classList.toggle('pass-color', passed);
@@ -560,7 +563,7 @@ function showResults(result) {
     /* Count-up animation */
     let current = 0;
     const numEl = $('score-num');
-    const step  = Math.ceil(score / 40);
+    const step = Math.ceil(score / 40);
     const timer = setInterval(() => {
         current = Math.min(current + step, score);
         numEl.textContent = current;
@@ -569,7 +572,7 @@ function showResults(result) {
 
     /* Badges */
     $('pass-badge').classList.toggle('hidden', !passed);
-    $('fail-badge').classList.toggle('hidden',  passed);
+    $('fail-badge').classList.toggle('hidden', passed);
 
     /* Verification status */
     $('verification-status').textContent = result.skill_verification_status || '';
