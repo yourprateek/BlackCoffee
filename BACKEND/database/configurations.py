@@ -10,15 +10,11 @@ client = AsyncIOMotorClient(uri)
 users_db: Database = client.users_database
 
 profiles_collections: Collection = users_db.user_profiles
-profiles_collections.create_index('email', unique= True)
 
 user_chat_collections: Collection = users_db.chats_collections
-user_chat_collections.create_index('email')
 
 user_docs_collection: Collection = users_db.docs_collections
-user_docs_collection.create_index('email')
 
 recruiters_db: Database = client.recruiter_database
 
 company_profile_collections: Collection = recruiters_db.cm_profiles
-company_profile_collections.create_index('company_name')
