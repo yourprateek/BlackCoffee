@@ -2,7 +2,7 @@ import json
 from database.configurations import user_chat_collections
 from schemas.user_schema import User
 from database.user_db import get_user_data
-from schemas.schema import QuestionItem, AssessmentSchema, AnalysisSchema, GeneratedQuestions
+from schemas.schema import QuestionItem, AnalysisSchema, GeneratedQuestions
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
@@ -56,7 +56,7 @@ Here is the list of fields :- {fields}
     ).partial(format_instructions= parser.get_format_instructions())
 
     chain: Runnable = prompt_temp | func_model | parser
-    result: AssessmentSchema = await chain.ainvoke({"fields": state['topics']})
+    result: GeneratedQuestions = await chain.ainvoke({"fields": state['topics']})
     return {
         'questions': result.questions
     }
