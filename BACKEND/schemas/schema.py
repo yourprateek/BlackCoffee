@@ -56,10 +56,8 @@ class AnalysisSchema(BaseModel):
     )
 
 class SubmitAssessmentRequest(BaseModel):
-    assessment_id: UUID
-    answers: Dict[str, str] = Field(...,
-        example={"q_1": "A", "q_2": "FastAPI handles routing efficiently."}
-    )
+    assessment_id: str
+    user_answers: Dict[str, str]
 
 class ResumeOutputSchema(BaseModel):
     skills: List[str] = Field(
