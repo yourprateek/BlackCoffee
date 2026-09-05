@@ -100,7 +100,7 @@ async def call_career_llm_node(state: ChatState):
                 msgs_for_model.append(AIMessage(content=content))
 
     model = ChatGoogleGenerativeAI(
-        model='gemini-2.5-flash',
+        model='gemini-3.6-flash',
         temperature=0.45
     )
     response = await model.ainvoke(msgs_for_model)
