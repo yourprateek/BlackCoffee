@@ -10,6 +10,7 @@ langchain-groq
 langchain-google-genai
 langgraph
 tavily-python
+python-multipart
 pypdf
 httpx
 python-dotenv
