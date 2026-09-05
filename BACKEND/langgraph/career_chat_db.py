@@ -1,17 +1,17 @@
+import os
 from database.configurations import user_chat_collections
 from schemas.user_schema import User
 from database.user_db import get_user_data
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
-from typing import List, TypedDict, Optional, Annotated
+from typing import List, TypedDict, Optional
 
 class ChatState(TypedDict):
     email: str
     message: str
     thread_title: Optional[str]  
-    messages_history: Annotated[List[dict], add_messages]
+    messages_history: List[dict] 
     final_reply: str
 
 async def chat_history_node(state: ChatState):
@@ -20,7 +20,6 @@ async def chat_history_node(state: ChatState):
     thread_title = state.get("thread_title")
 
     user_doc = await user_chat_collections.find_one({"email": email})
-
     if not user_doc:
         user_doc = {"email": email, "threads": []}
         await user_chat_collections.insert_one(user_doc)
@@ -58,7 +57,7 @@ async def chat_history_node(state: ChatState):
             {"role": "human", "content": user_msg}
         ]
     else:
-        target_thread = next((t for t in user_doc.get("threads", []) if t["thread_title"] == thread_title), None)
+        target_thread = next((t for t in user_doc.get("threads", []) if t.get("thread_title") == thread_title), None)
         
         if target_thread:
             messages_to_process = list(target_thread.get("messages", []))
@@ -77,35 +76,29 @@ async def call_career_llm_node(state: ChatState):
     msgs_for_model = []
     
     for msg in state.get("messages_history", []):
-        # 1. If it's already a LangChain message object, pass it directly
         if isinstance(msg, BaseMessage):
             msgs_for_model.append(msg)
             continue
 
-        # 2. If it's a dict, safely extract using .get()
-        if isinstance(msg, dict):
-            role = msg.get("role")
-            content = msg.get("content", "")
-            
-            # If the content itself was wrapped as a message object
-            if isinstance(content, BaseMessage):
-                content = content.content
-            else:
-                content = str(content)
+        role = msg.get("role")
+        content = msg.get("content", "")
+        
+        if role == "system":
+            msgs_for_model.append(SystemMessage(content=content))
+        elif role == "human":
+            msgs_for_model.append(HumanMessage(content=content))
+        elif role == "ai":
+            msgs_for_model.append(AIMessage(content=content))
 
-            if role == "system":
-                msgs_for_model.append(SystemMessage(content=content))
-            elif role == "human":
-                msgs_for_model.append(HumanMessage(content=content))
-            elif role == "ai":
-                msgs_for_model.append(AIMessage(content=content))
-
-    model = ChatGoogleGenerativeAI(
-        model='gemini-2.0-flash',
-        temperature=0.45
-    )
-    response = await model.ainvoke(msgs_for_model)
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     
+    model = ChatGoogleGenerativeAI(
+        model='gemini-2.0-flash', 
+        google_api_key=api_key,
+        temperature=0.4
+    )
+    
+    response = await model.ainvoke(msgs_for_model)
     return {"final_reply": response.content}
     
 async def save_to_mongodb_node(state: ChatState):
@@ -118,9 +111,15 @@ async def save_to_mongodb_node(state: ChatState):
     threads = user_doc.get("threads", []) if user_doc else []
     thread_exists = any(t.get("thread_title") == thread_title for t in threads)
 
+    first_msg = state["messages_history"][0] if state.get("messages_history") else None
+    if isinstance(first_msg, BaseMessage):
+        system_msg = first_msg.content
+    elif isinstance(first_msg, dict):
+        system_msg = first_msg.get("content", "")
+    else:
+        system_msg = ""
+
     if not thread_exists:
-        system_msg = state["messages_history"][0]["content"] if state["messages_history"] else ""
-        
         new_thread_data = {
             "thread_title": thread_title,
             "messages": [

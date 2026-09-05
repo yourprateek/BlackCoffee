@@ -2,10 +2,11 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.collection import Collection
 from motor.motor_asyncio import AsyncIOMotorClient
+import certifi
 
 uri = "mongodb+srv://sakshu1807_db_user:la7ksVABU1H0cxJz@blackcoffeecluster.7hefs0v.mongodb.net/?appName=BlackCoffeeCluster"
 
-client = AsyncIOMotorClient(uri)
+client = AsyncIOMotorClient(uri, tls=True, tlsCAFile=certifi.where())
 
 users_db: Database = client.users_database
 

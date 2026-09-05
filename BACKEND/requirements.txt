@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+pydantic[email]
 motor
 pymongo
 pydantic
@@ -9,7 +10,9 @@ langchain-groq
 langchain-google-genai
 langgraph
 tavily-python
+python-multipart
 pypdf
 httpx
 python-dotenv
 rich
+certifi
