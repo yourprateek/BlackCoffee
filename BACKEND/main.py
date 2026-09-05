@@ -50,16 +50,17 @@ async def get_user(user_email: EmailStr) -> Dict[str, Any]:
 UserDependency = Annotated[dict, Depends(get_user)]
 
 @app.get('/all_threads')
-async def get_all_threads(user: UserDependency) -> List[str]:
+async def get_all_threads(user: UserDependency) -> List[str] | str:
 
     try:
         all_chat_threads = await user_chat_collections.find_one(
             {'email': user['email']},
-            {'email': 0, 'threads': 1}
+            {'threads': 1}
         )
-
-        all_thread_titles = [thread['thread_title'] for thread in all_chat_threads]
-        return all_thread_titles
+        if all_chat_threads:
+            all_thread_titles = [thread['thread_title'] for thread in all_chat_threads]
+            return all_thread_titles
+        return "No such threads found"
     except Exception as err:
         raise HTTPException(status_code= 500, detail= str(err))
 
