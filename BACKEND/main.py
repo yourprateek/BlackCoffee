@@ -321,10 +321,10 @@ async def submit_assessment(payload: SubmitAssessmentRequest, user: UserDependen
     }
     
 @app.post('/career_talk')
-async def chatbot_guide(payload: CareerChatPayload, user: UserDependency):
+async def chatbot_guide(payload: CareerChatPayload, user_email: EmailStr):
     try:
         result = await career_chat_graph.ainvoke({
-            "email": user['email'],
+            "email": user_email,
             "message": payload.message,
             "thread_title": payload.thread_title,
             "messages_history": [],
