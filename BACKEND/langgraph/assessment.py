@@ -25,7 +25,7 @@ class AssessmentState(TypedDict):
 async def assessment_generator(state: AssessmentState):
 
     func_model = ChatGroq(
-            model= 'openai/gpt-oss-120b',
+            model= 'openai/gpt-oss-20b',
             temperature= 0.1
         )
     parser = PydanticOutputParser(pydantic_object= GeneratedQuestions)
@@ -65,7 +65,7 @@ Here is the list of fields :- {fields}
 async def assessment_score(state: AssessmentState):
 
     func_model = ChatGroq(
-        model= 'openai/gpt-oss-120b',
+        model= 'openai/gpt-oss-20b',
         temperature= 0.5
     )
     parser = PydanticOutputParser(pydantic_object= AnalysisSchema)
