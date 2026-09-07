@@ -216,7 +216,7 @@ async function submitAssessment() {
 
     try {
         const res = await fetch(
-            `${API_BASE}/assessment_score?user_email=${encodeURIComponent(state.userEmail)}&assessment_id=${encodeURIComponent(state.assessmentId)}`,
+            `${API_BASE}/assessment_score?user_email=${encodeURIComponent(state.userEmail)}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
